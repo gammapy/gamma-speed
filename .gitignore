@@ -1,2 +1,7 @@
 *.pyc
 *.ipynb_checkpoints
+.project
+.pydevproject
+.setting
+code/first
+
