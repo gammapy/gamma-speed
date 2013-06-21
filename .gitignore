@@ -6,3 +6,8 @@
 .setting
 code/first
 
+# By default ignore data files ... can add by hand if we want to
+*.fits
+*.log
+*.xml
+
