@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """Automatically Monitor CPU, memory and disk I/O for a given process.
 
 Example: ./monitor.py "ls -lh"
@@ -11,18 +12,19 @@ import time
 import multiprocessing
 import os
 
-def monitor(cmd, outfile):
+def monitor(cmd, outfile,cpuinterval):
         """Execute a given command (cmd is a string)
         and write usage to outfile"""
         process = psutil.Popen(cmd[0].split(), stdout=subprocess.PIPE)
 
         df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME','TIME'])
-                
-        name = process.name
+#         import IPython; IPython.embed()
+        
+        name = process.name     
         # The following thread stops when the initial one has come to a halt.
         while process.poll() == None:
             try:
-                s = pd.Series([process.get_cpu_percent(interval=0.1), process.get_memory_info()[1], 
+                s = pd.Series([process.get_cpu_percent(interval=float(cpuinterval)), process.get_memory_info()[1], 
                                process.get_io_counters ()[0], process.get_io_counters ()[1], process.get_io_counters ()[3], name,time.time()],
                               index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME','TIME'])
                 df = df.append(s, ignore_index=True)
@@ -37,14 +39,16 @@ def main():
                         help='Output file name')
     parser.add_argument('-mt', '--maxthreads', default=multiprocessing.cpu_count(),
                         help='Maximum number of threads for the measurement')
+    parser.add_argument('-ti', '--timeinterval', default=0.1, 
+                        help='The sampling interval at which the CPU measurements should take place')
     parser.add_argument('cmd', nargs='+',
                         help='Command to execute')
 
     args = parser.parse_args()
-#     import IPython; IPython.embed()
+
     for i in xrange(args.maxthreads):
         os.environ["OMP_NUM_THREADS"]=str(i+1)
-        monitor(cmd=args.cmd, outfile=args.outfile+"_CPUs="+str(i+1)+"_.csv")
+        monitor(cmd=args.cmd, outfile=args.outfile+"_CPUs="+str(i+1)+"_.csv",cpuinterval=args.timeinterval)
     
 
 if __name__ == '__main__':
