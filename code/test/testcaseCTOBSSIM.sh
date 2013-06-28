@@ -5,12 +5,15 @@ mkdir plots
 
 .././monitor.py ".././run_multi_ctobssim.py -nobs=4 -dur=1000"
 .././monitorPlot.py
+.././speedupPlot.py
 
 .././monitor.py ".././run_multi_ctobssim.py -nobs=4 -dur=10000"
 .././monitorPlot.py
+.././speedupPlot.py
 
-.././monitor.py "../.run_multi_ctobssim.py -nobs=4 -dur=100000"
+.././monitor.py ".././run_multi_ctobssim.py -nobs=4 -dur=100000"
 .././monitorPlot.py
+.././speedupPlot.py
 
 rm -r *.fits *.csv *.log *.xml
 
