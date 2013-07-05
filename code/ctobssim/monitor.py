@@ -18,7 +18,7 @@ class monitor:
         self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
         self.threads = nthreads 
-        
+    
     def monitor(self, outfile, cpuinterval):
         """Execute a given command (cmd is a string)
         and write usage to outfile"""

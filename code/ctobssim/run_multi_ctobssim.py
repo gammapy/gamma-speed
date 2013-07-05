@@ -68,27 +68,23 @@ def set(RA=83.63, DEC=22.01, tstart=0.0, duration=1800.0, deadc=0.95,
     return obs
 
 
-def run_multi_ctobssim(altRA, altDEC, altTSTART, altDURATION, altDEADC, altEMIN, altEMAX, altRAD, altIRF, altCALDB, outfile, nobs):
+def run_multi_ctobssim(RA, DEC, TSTART, DURATION, DEADC, EMIN, EMAX, RAD, IRF, CALDB, outfile, nobs):
     """TODO: document what it does"""
 
     observations = gammalib.GObservations()
     
     # Automatically generate a number of nobs
     for i in xrange(nobs):
-        obs = set(RA=altRA, DEC=altDEC, tstart=altTSTART, duration=altDURATION, deadc=altDEADC,
-                  emin=altEMIN, emax=altEMAX, rad=altRAD,
-                  irf=altIRF, caldb=altCALDB)
+        obs = set(RA, DEC, TSTART, DURATION, DEADC, EMIN, EMAX, RAD, IRF, CALDB)
         obs.id(str(i))
         observations.append(obs)
 
-    subprocess.call("export OMP_NUM_THREADS=2",shell=True)
     observations.models('$CTOOLS/share/models/crab.xml')
 #         import IPython; IPython.embed(); 
     
     ctobssim = ctools.ctobssim(observations)
     ctobssim.logFileOpen()
     ctobssim['outfile'].filename(outfile)
-
     
     ctobssim.execute()
 
