@@ -57,7 +57,7 @@ def main():
     
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            my_monitor = monitor(args.cmd, nthrd)
+            my_monitor = monitor(args.cmd, nthrd+1)
             my_monitor.monitor(outfile=args.outfile + "_CPUs=" + str(nthrd+1) + ".csv", 
                                cpuinterval=args.timeinterval)
     else:
