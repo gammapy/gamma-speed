@@ -81,7 +81,6 @@ def run_multi_ctobssim(altRA, altDEC, altTSTART, altDURATION, altDEADC, altEMIN,
         obs.id(str(i))
         observations.append(obs)
 
-    subprocess.call("export OMP_NUM_THREADS=2",shell=True)
     observations.models('$CTOOLS/share/models/crab.xml')
 #         import IPython; IPython.embed(); 
     
