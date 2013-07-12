@@ -11,16 +11,19 @@ import subprocess
 import time
 import multiprocessing
 import os
- 
+import glob
+
 class monitor:
     def __init__(self, cmd, nthreads):
+        """Initialize a monitor object with a given command (cmd is a string)
+        that will run on nthreads """
         self.process = psutil.Popen(cmd, stdout=subprocess.PIPE)
         self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
         self.threads = nthreads 
     
     def monitor(self, outfile, cpuinterval):
-        """Execute a given command (cmd is a string)
+        """Monitor a given command using a CPU interval of cpuinterval
         and write usage to outfile"""
         os.environ["OMP_NUM_THREADS"] = str(self.threads)
         # The following thread stops when the initial one has come to a halt.
@@ -35,11 +38,38 @@ class monitor:
         # write the values into a csv file        
         self.df.to_csv(outfile)
 
+    def parse_time(self,time_s):
+        """parse the time for a GLog entry into second since the epoch"""
+        sec = time_s.split('.')[0]
+        mic = time_s.split('.')[1]
+        time_f = time.mktime(time.strptime(sec, '%Y-%m-%dT%H:%M:%S')) + float('0.' + mic)
+        return time_f
+        
+    def parse_log(self,logname):
+        """parse a log file name logname and select the entries of type
+        gammaspeed:entry"""
+        file = open(logname, 'r')
+        content = filter(lambda t:'gammaspeed' in t, file.readlines())
+        log_frame = pd.DataFrame(columns=['TIME', 'EVENT'])
+        for c in content:
+            time = c.split()[0]; 
+            event = c.split()[2:]; 
+            s = pd.Series(index=['TIME', 'EVENT'], data=[self.parse_time(time), event])
+            log_frame = log_frame.append(s, ignore_index=True)
+        return log_frame
+        
+    def parse_extension(self,logext, outname):
+        """parse all the logfiles of a certain extension logext and call parse_log on the files"""
+        log = pd.DataFrame(columns=['TIME', 'EVENT'])
+        for filename in glob.glob(logext):
+            log = log.append(self.parse_log(filename), ignore_index=True)
+        log.to_csv(outname) 
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-o', '--outfile', default='monitor',
                         help='Output file name')
-    parser.add_argument('-mt', '--maxthreads', default=multiprocessing.cpu_count(), 
+    parser.add_argument('-mt', '--maxthreads', default=multiprocessing.cpu_count(),
                         help='Maximum number of threads for the measurement')
     parser.add_argument('-ti', '--timeinterval', default=0.1,
                         help='The sampling interval at which the CPU measurements should take place')
@@ -57,8 +87,8 @@ def main():
     
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            my_monitor = monitor(args.cmd, nthrd+1)
-            my_monitor.monitor(outfile=args.outfile + "_CPUs=" + str(nthrd+1) + ".csv", 
+            my_monitor = monitor(args.cmd, nthrd + 1)
+            my_monitor.monitor(outfile=args.outfile + "_CPUs=" + str(nthrd + 1) + ".csv",
                                cpuinterval=args.timeinterval)
     else:
         my_monitor = monitor(args.cmd, args.maxthreads)

@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 """Run ctobssim with multiple observations to see if OpenMP kicks in."""
 import argparse
-import logging
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 import gammalib
 import ctools
-import subprocess
-import multiprocessing
 import pandas as pd
 import platform
 
@@ -108,9 +104,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     run_multi_ctobssim(args.RA, args.DEC, args.tstart, args.dur, args.deadc, args.emin, args.emax, args.rad, args.irf, args.caldb, args.outfile, args.nobs)
-    
-# The following lines of code should be moved to an outside script such that their execution does not cause execution overhead. 
-# However, now they are needed for logging the input parameters 
-    s=pd.Series(['values',args.RA, args.DEC, args.tstart, args.dur, args.deadc, args.emin, args.emax, args.rad, args.irf, args.caldb, args.outfile, args.nobs, platform.node()],
-                              index=['parameter name','RA', 'DEC', 'tstart', 'dur', 'deadc', 'emin', 'emax', 'rad', 'irf', 'caldb', 'outfile', 'nobs', 'macName'])
-    s.to_csv('temp.csv')
