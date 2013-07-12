@@ -80,7 +80,6 @@ def run_multi_ctobssim(RA, DEC, TSTART, DURATION, DEADC, EMIN, EMAX, RAD, IRF, C
         observations.append(obs)
 
     observations.models('$CTOOLS/share/models/crab.xml')
-#         import IPython; IPython.embed(); 
     
     ctobssim = ctools.ctobssim(observations)
     ctobssim.logFileOpen()

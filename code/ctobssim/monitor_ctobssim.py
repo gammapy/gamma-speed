@@ -2,8 +2,10 @@
 import argparse
 import multiprocessing
 import os
+import pandas as pd
+import time
 # TODO: import monitor.py through a relative path?
-import monitor as mt
+import src.monitor as mt
 
 def parse_ctobssim_time(time_s):
     sec = time_s.split('.')[0]
@@ -39,13 +41,12 @@ def main():
     
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            ctobs_monitor = mt.monitor("./run_multi_ctobssim.py " + args.ctobsargs, nthrd + 1)
-            ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv")
+            ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, nthrd + 1)
+            ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
             parse_log('ctobssim.log', 'ctobssim_' + str(nthrd + 1) + 'CPUs.csv')
     else:
-        
         ctobs_monitor = mt.monitor("./run_multi_ctobssim.py " + args.ctobsargs, args.maxthreads)
-        ctobs_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv")
+        ctobs_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
         parse_log('ctobssim.log', 'ctobssim_' + str(args.maxthreads) + 'CPUs.csv')
 
 if __name__ == '__main__':

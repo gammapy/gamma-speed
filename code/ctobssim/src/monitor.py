@@ -14,7 +14,7 @@ import os
  
 class monitor:
     def __init__(self, cmd, nthreads):
-        self.process = psutil.Popen(cmd[0].split(), stdout=subprocess.PIPE)
+        self.process = psutil.Popen(cmd, stdout=subprocess.PIPE)
         self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
         self.threads = nthreads 
