@@ -2,6 +2,10 @@
 import argparse
 import multiprocessing
 import src.monitor as mt
+TIME_ZONE_SHIFT = 7200  # the ctobssim log messages correspond to 
+                        # Greenwich Mean Time and python makes the 
+                        # measurements for the current time zone - 
+                        # in this case, CET -> 7200 s shift
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -20,12 +24,13 @@ def main():
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
             ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, nthrd + 1)
+            print nthrd
             ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
-            ctobs_monitor.parse_extension(logext='*.log', outname='ctobssim_' + str(nthrd + 1) + 'CPUs.csv')
+            ctobs_monitor.parse_extension(logext='*.log', outname='ctobssim_CPUs=' + str(nthrd+1) + '.csv', time_shift=TIME_ZONE_SHIFT)
     else:
-        ctobs_monitor = mt.monitor("./run_multi_ctobssim.py " + args.ctobsargs, args.maxthreads)
+        ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, args.maxthreads)
         ctobs_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
-        ctobs_monitor.parse_extension(str("*.log"), outname='ctobssim_' + str(args.maxthreads) + 'CPUs.csv')
+        ctobs_monitor.parse_extension(str("*.log"), outname='ctobssim_CPUs=' + str(args.maxthreads) + '.csv', time_shift=TIME_ZONE_SHIFT)
 
 if __name__ == '__main__':
     main()

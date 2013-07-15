@@ -26,6 +26,7 @@ class monitor:
         """Monitor a given command using a CPU interval of cpuinterval
         and write usage to outfile"""
         os.environ["OMP_NUM_THREADS"] = str(self.threads)
+        print self.threads
         # The following thread stops when the initial one has come to a halt.
         while self.process.poll() == None:
             try:
@@ -38,14 +39,14 @@ class monitor:
         # write the values into a csv file        
         self.df.to_csv(outfile)
 
-    def parse_time(self,time_s):
+    def parse_time(self, time_s, time_shift ):
         """parse the time for a GLog entry into second since the epoch"""
         sec = time_s.split('.')[0]
         mic = time_s.split('.')[1]
-        time_f = time.mktime(time.strptime(sec, '%Y-%m-%dT%H:%M:%S')) + float('0.' + mic)
+        time_f = time.mktime(time.strptime(sec, '%Y-%m-%dT%H:%M:%S')) + float('0.' + mic) + float(time_shift)
         return time_f
         
-    def parse_log(self,logname):
+    def parse_log(self, logname, time_shift):
         """parse a log file name logname and select the entries of type
         gammaspeed:entry"""
         file = open(logname, 'r')
@@ -54,15 +55,15 @@ class monitor:
         for c in content:
             time = c.split()[0]; 
             event = c.split()[2:]; 
-            s = pd.Series(index=['TIME', 'EVENT'], data=[self.parse_time(time), event])
+            s = pd.Series(index=['TIME', 'EVENT'], data=[self.parse_time(time, time_shift), event])
             log_frame = log_frame.append(s, ignore_index=True)
         return log_frame
         
-    def parse_extension(self,logext, outname):
+    def parse_extension(self, logext, outname, time_shift):
         """parse all the logfiles of a certain extension logext and call parse_log on the files"""
         log = pd.DataFrame(columns=['TIME', 'EVENT'])
         for filename in glob.glob(logext):
-            log = log.append(self.parse_log(filename), ignore_index=True)
+            log = log.append(self.parse_log(filename, time_shift), ignore_index=True)
         log.to_csv(outname) 
 
 def main():
