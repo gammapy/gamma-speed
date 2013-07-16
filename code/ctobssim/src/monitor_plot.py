@@ -29,19 +29,11 @@ class monitorplot:
         df['TIME'] = df['TIME'] - df.at[0, 'TIME']
         return df
         
-    def read_gammalib_log(self):     
+    def read_gammalib_log(self, current_CPU_count):     
        filename = self.procname + "_CPUs=" + str(current_CPU_count + 1) + ".csv"
-       df = read_csv(filename)
+       df = pd.read_csv(filename)
        return df
 
-#     def select_lines(infile, start_time, search_string):
-#         ctobs = pd.read_csv(infile)
-#         result = np.array([])
-#         ctobs['TIME'] = ctobs['TIME'] - start_time + TIME_ZONE_SHIFT
-#         for i in range(len(search_string)):
-#             result = np.append(result, ctobs[ctobs['EVENT'].str.contains(search_string[i])]['TIME'])    
-#         return result
-    
     def mplot(self, outfile, figtitle):
         """
         function used to plot the data gathered by monitor.py
@@ -57,16 +49,6 @@ class monitorplot:
             else:
                 core_label = str(i + 1) + ' cores'
      
-    #          The monitor_plot was originally intended to measure ctobssim
-    #          In order to adapt it to general purposes, the following ctobssim 
-    #          specific code has been made optional
-#             if func == 'ctobssim':
-#                 sim_loop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
-#                 w_start = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_start'])
-#                 w_stop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_done'])
-                       
-             
-             
             plt.subplot(411)
             df.plot(x='TIME', y='CPU_USAGE', label=core_label)
             plt.ylabel('CPU (%)')
@@ -76,10 +58,6 @@ class monitorplot:
             plt.xlabel('Time(s)')
             [x1, x2, y1, y2] = plt.axis()
             plt.axis((x1, x2, y1, y2 * 1.1))
-#             if func == 'ctobssim':   
-#                 plt.vlines(sim_loop, ymin=y1, ymax=y2, colors='m')
-#                 plt.vlines(w_start, ymin=y1, ymax=y2, colors='r')
-#                 plt.vlines(w_stop, ymin=y1, ymax=y2, colors='g')
               
             mem = plt.subplot(412)
             df.plot(x='TIME', y='MEM_USAGE', label=core_label)
@@ -90,20 +68,7 @@ class monitorplot:
             plt.xlabel('Time(s)')
             [x1, x2, y1, y2] = plt.axis()
             plt.axis((x1, x2, y1, y2 * 1.1))
-#             if func == 'ctobssim':
-#                 plt.vlines(w_start, ymin=y1, ymax=y2, colors='r')
-#                 plt.vlines(w_stop, ymin=y1, ymax=y2, colors='g')
              
-    #         plt.subplot(514)
-    #         df['IO_READ_COUNTS'].plot()
-    #         plt.ylabel('IO Read (counts)')
-    #         plt.title('IO Read counts for ' + name)
-    #   
-    #         plt.subplot(515)
-    #         df['IO_WRITE_COUNTS'].plot()
-    #         plt.ylabel('IO Write (counts)')
-    #         plt.title('IO write counts for ' + name)     
-              
             plt.subplot(413)
             df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'] / int(1e6)
             iow = df.plot(x='TIME', y='IO_WRITE_BYTES', label=core_label)
@@ -125,27 +90,17 @@ class monitorplot:
             plt.xlabel('Time(s)')
             [x1, x2, y1, y2] = plt.axis()
             plt.axis((x1, x2, y1, y2 * 1.1))
-#             if func == 'ctobssim':
-#                 plt.vlines(w_start, ymin=y1, ymax=y2, colors='r')
-#                 plt.vlines(w_stop, ymin=y1, ymax=y2, colors='g')
-             
              
         fig.subplots_adjust(hspace=.5)
          
-#         if func == 'ctobssim':    
-#             s = pd.read_csv('temp.csv')
-#             plt_name = 'plots/' + out_pref + str(float(s['values'][3]) - float(s['values'][2])) + 'sec_' + s['values'][11] + 'obs_' + s['values'][12] + '.png'
-#             fig.suptitle('Observation time:' + str(float(s['values'][3]) - float(s['values'][2])) + ' seconds; ' + s['values'][11] + ' runs; Machine: ' + s['values'][12])
-#         else:
         fig.suptitle(figtitle)
         
         if outfile=='':
-            plt.show()
             return plt
         else:
-            plt.savefig(outfile+".png")
+            plt.savefig(outfile + ".png")
 
-    def speed_up(self, ncores, figtitle, out_pref='speed_up', save_plot=True, speed_frame=None):
+    def speed_up(self, ncores, figtitle, out_pref='', save_plot=True, speed_frame=None):
         """
         function used for plotting the speed up.
         If speed_frame is defined and contains other time values than the total ones,
@@ -155,8 +110,8 @@ class monitorplot:
         if speed_frame==None:
             cores = [i + 1 for i in range(ncores)]
             times = pd.Series(index=cores)
-            for i in uxrange(int(ncores)):
-                df = self.read_monitor_log(i)
+            for i in xrange(int(ncores)):
+                df = self.read_gammalib_log(i)
                 # time spent for the whole process
                 times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
                 
@@ -164,12 +119,11 @@ class monitorplot:
             eff = speed / cores
         else:
             cores = [i + 1 for i in range(ncores)]
-            times = speed_frame['TIME']
-            speed = pd.Series(data=times[1] / times, index=cores)
+            speed = pd.Series(data=speed_frame[0] / speed_frame, index=cores)
             eff = speed / cores
             
         #plot style definitions
-        speedfig = plt.figure(1)
+        speedfig = plt.figure()
         axes = plt.subplot(211)
         speedP = speed.plot(color='g', marker='.', ls='-', ms=15.0, mec='r')
         plt.ylabel('Speed-up factor (relative)')
@@ -178,7 +132,7 @@ class monitorplot:
         axes.set_xlim(left=0, right=ncores + 1)
         axes.set_ylim(bottom=0)
         xa = axes.get_xaxis()
-        xa.set_major_locator(MaxNLocator(integer=True))
+#         xa.set_major_locator(MaxNLocator(integer=True))
         
         
         axes = plt.subplot(212)
@@ -189,12 +143,12 @@ class monitorplot:
         axes.set_xlim(left=0, right=ncores + 1)
         axes.set_ylim(bottom=0, top=1.2)
         xa = axes.get_xaxis()
-        xa.set_major_locator(MaxNLocator(integer=True))
+#         xa.set_major_locator(MaxNLocator(integer=True))
         
         speedfig.subplots_adjust(hspace=.5)
 
         pltname='plots/' + out_pref + '_speed_up.png'
-        fig.suptitle(figtitle)
+        speedfig.suptitle(figtitle)
             
         if save_plot:
             plt.savefig(pltname)

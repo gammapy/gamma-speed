@@ -17,15 +17,15 @@ class monitor:
     def __init__(self, cmd, nthreads):
         """Initialize a monitor object with a given command (cmd is a string)
         that will run on nthreads """
+        self.threads = nthreads 
+        os.environ["OMP_NUM_THREADS"] = str(self.threads)
         self.process = psutil.Popen(cmd, stdout=subprocess.PIPE)
         self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
-        self.threads = nthreads 
     
     def monitor(self, outfile, cpuinterval):
         """Monitor a given command using a CPU interval of cpuinterval
         and write usage to outfile"""
-        os.environ["OMP_NUM_THREADS"] = str(self.threads)
         print self.threads
         # The following thread stops when the initial one has come to a halt.
         while self.process.poll() == None:
