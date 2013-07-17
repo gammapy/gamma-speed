@@ -20,7 +20,7 @@ class installer:
         self.options = options
 
     def __call__(self):
-        self.create_general_installation()
+        self.create_environment()
         self.install_gammalib()
         self.install_ctools()
         
@@ -35,7 +35,8 @@ class installer:
         # Create the install commands and execute them
         try:
             down = "mkdir {0}; cd {0}; git clone {1}; git clone {2}; mkdir install".format(name, GAMMALIB_URL, CTOOLS_URL)
-            subprocess.Popen(cmd=down, shell=True, stdout=subprocess.PIPE)
+            proc = subprocess.Popen(args=down, shell=True, stdout=subprocess.PIPE)
+            proc.wait()
             options['install_path'] = os.path.abspath(name + '/install')
             logging.info("software successfuly downloaded")
         except:
@@ -57,7 +58,8 @@ class installer:
         
         gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
         try:
-            subprocess.Popen(cmd=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            proc = subprocess.Popen(args=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            proc.wait()
             logging.info("GAMMALIB install finished")
         except:
             logging.error("GAMMALIB install failed")
@@ -78,7 +80,8 @@ class installer:
         
         gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
         try:
-            subprocess.Popen(cmd=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            proc = subprocess.Popen(args = goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            proc.wait()
             logging.info("CTOOLS install finished")
         except:
             logging.error("CTOOLS install failed")
