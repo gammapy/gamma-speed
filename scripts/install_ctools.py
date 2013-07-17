@@ -11,29 +11,118 @@ import subprocess
 import os
 import argparse
 import logging
+import pandas as pd
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
 
-def create_installation(options):
-    logging.info('Creating installation: {0}'.format(options['name']))
+class installer:
+    def __init__(self, options):
+        self.options = options
 
+    def __call__(self):
+        self.create_general_installation()
+        self.install_gammalib()
+        self.install_ctools()
+        
+    def create_environment(self):
+        logging.info('Creating installation: {0}'.format(options['name']))
+    
+        name = options['name']
+        
+        GAMMALIB_URL = options['gamma_url']
+        CTOOLS_URL = options['ctools_url']
+        
+        # Create the install commands and execute them
+        try:
+            down = "mkdir {0}; cd {0}; git clone {1}; git clone {2}; mkdir install".format(name, GAMMALIB_URL, CTOOLS_URL)
+            subprocess.Popen(cmd=down, shell=True, stdout=subprocess.PIPE)
+            options['install_path'] = os.path.abspath(name + '/install')
+            logging.info("software successfuly downloaded")
+        except:
+            logging.error("something went wrong")
+            exit()
+            
+    def install_gammalib(self):
+        logging.info("Entered GAMMALIB install")
+    
+        folder_name = options['name'] + '/gammalib/'
+        
+        # account for the possibility of having to install a certain branch
+        if options['branch'] != None:
+            branch_me_baby = 'git checkout ' + options['branch'] + "; "
+        else:
+            branch_me_baby = ''
+            
+        goto_branch = "cd " + folder_name + "; " + branch_me_baby
+        
+        gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
+        try:
+            subprocess.Popen(cmd=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            logging.info("GAMMALIB install finished")
+        except:
+            logging.error("GAMMALIB install failed")
+            exit()
+    
+    def install_ctools(self):
+        logging.info("Entered CTOOLS install")
+    
+        folder_name = options['name'] + '/ctools/'
+        
+        # account for the possibility of having to install a certain branch
+        if options['branch'] != None:
+            branch_me_baby = 'git checkout ' + options['branch'] + "; "
+        else:
+            branch_me_baby = ''
+            
+        goto_branch = "cd " + folder_name + "; " + branch_me_baby
+        
+        gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
+        try:
+            subprocess.Popen(cmd=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
+            logging.info("CTOOLS install finished")
+        except:
+            logging.error("CTOOLS install failed")
+            exit()
+    
+def general_install():
     GAMMALIB_URL = 'git@github.com:gammalib/gammalib.git'
-    cmds = """
-mkdir {name}
-cd {name}
-git clone {GAMMALIB_URL}"""
-
-
-def create_all_installations():
-    pass
-
+    CTOOLS_URL = 'git@github.com:ctools/ctools.git'
+    NAME = 'general_install'
+    BRANCH = None
+    INSTALL_PATH = None
+    
+    options = pd.Series(data=[GAMMALIB_URL, CTOOLS_URL, NAME, BRANCH, INSTALL_PATH],
+                        index=['gamma_url', 'ctools_url', 'name', 'branch', 'install_path'], dtype=str)
+    
+    gen_installer = installer(options)
+    gen_installer()
+    
+def logging_install():
+    GAMMALIB_URL = 'git@github.com:ignatndr/gammalib.git'
+    CTOOLS_URL = 'git@github.com:ignatndr/ctools.git'
+    NAME = 'extralog_install'
+    BRANCH = 'gammaspeed_extra_log'
+    INSTALL_PATH = None
+    
+    options = pd.Series(data=[GAMMALIB_URL, CTOOLS_URL, NAME, BRANCH, INSTALL_PATH],
+                        index=['gamma_url', 'ctools_url', 'name', 'branch', 'install_path'], dtype=str)
+    
+    log_installer = installer(options)
+    log_installer()
+    
 
 if __name__ == '__main__':
-    """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('infile', type=str,
-                        help='Input FITS file name')
+    parser.add_argument('-log', type=bool, default=False,
+                        help='Choose whether to install the extra_log version of ctools and gammalib')
+    
+    parser.add_argument('-gen', type=bool, default=False,
+                        help='Choose whether to install the general version of ctools and gammalib')
+    
     args = parser.parse_args()
-    args = vars(args)
-    """
-    create_all_environments()
+    if args.log:
+        logging_install()
+        
+    if args.gen:
+        general_install()
+
