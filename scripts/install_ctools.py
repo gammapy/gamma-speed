@@ -25,19 +25,19 @@ class installer:
         self.install_ctools()
         
     def create_environment(self):
-        logging.info('Creating installation: {0}'.format(options['name']))
+        logging.info('Creating installation: {0}'.format(self.options['name']))
     
-        name = options['name']
+        name = self.options['name']
         
-        GAMMALIB_URL = options['gamma_url']
-        CTOOLS_URL = options['ctools_url']
+        GAMMALIB_URL = self.options['gamma_url']
+        CTOOLS_URL = self.options['ctools_url']
         
         # Create the install commands and execute them
         try:
             down = "mkdir {0}; cd {0}; git clone {1}; git clone {2}; mkdir install".format(name, GAMMALIB_URL, CTOOLS_URL)
             proc = subprocess.Popen(args=down, shell=True, stdout=subprocess.PIPE)
             proc.wait()
-            options['install_path'] = os.path.abspath(name + '/install')
+            self.options['install_path'] = os.path.abspath(name + '/install')
             logging.info("software successfuly downloaded")
         except:
             logging.error("something went wrong")
@@ -46,17 +46,17 @@ class installer:
     def install_gammalib(self):
         logging.info("Entered GAMMALIB install")
     
-        folder_name = options['name'] + '/gammalib/'
+        folder_name = self.options['name'] + '/gammalib/'
         
         # account for the possibility of having to install a certain branch
-        if options['branch'] != None:
-            branch_me_baby = 'git checkout ' + options['branch'] + "; "
+        if self.options['branch'] != None:
+            branch_me_baby = 'git checkout ' + self.options['branch'] + "; "
         else:
             branch_me_baby = ''
             
         goto_branch = "cd " + folder_name + "; " + branch_me_baby
         
-        gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
+        gen_config_install = './autogen.sh; ' + './configure --prefix=' + self.options['install_path'] + '; make; make install'
         try:
             proc = subprocess.Popen(args=goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
             proc.wait()
@@ -68,17 +68,17 @@ class installer:
     def install_ctools(self):
         logging.info("Entered CTOOLS install")
     
-        folder_name = options['name'] + '/ctools/'
+        folder_name = self.options['name'] + '/ctools/'
         
         # account for the possibility of having to install a certain branch
-        if options['branch'] != None:
-            branch_me_baby = 'git checkout ' + options['branch'] + "; "
+        if self.options['branch'] != None:
+            branch_me_baby = 'git checkout ' + self.options['branch'] + "; "
         else:
             branch_me_baby = ''
             
         goto_branch = "cd " + folder_name + "; " + branch_me_baby
         
-        gen_config_install = './autogen.sh; ' + './configure --prefix=' + options['install_path'] + '; make; make install'
+        gen_config_install = './autogen.sh; ' + './configure --prefix=' + self.options['install_path'] + '; make; make install'
         try:
             proc = subprocess.Popen(args = goto_branch + gen_config_install, stdout=subprocess.PIPE, shell=True)
             proc.wait()
