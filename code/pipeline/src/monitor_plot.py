@@ -141,7 +141,7 @@ class monitorplot:
         plt.xlabel('Number of cores')
         plt.title('Efficiency for ctobssim')
         axes.set_xlim(left=0, right=ncores + 1)
-        axes.set_ylim(bottom=0, top=1.2)
+        axes.set_ylim(bottom=0)
         xa = axes.get_xaxis()
 #         xa.set_major_locator(MaxNLocator(integer=True))
         
