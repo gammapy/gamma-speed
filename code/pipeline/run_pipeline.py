@@ -6,6 +6,63 @@ import os
 import glob
 import sys
 
+def set(RA=83.63, DEC=22.01, tstart=0.0, duration=1800.0, deadc=0.95,
+        emin=0.1, emax=100.0, rad=5.0,
+        irf="cta_dummy_irf", caldb="$GAMMALIB/share/caldb/cta"):
+    """Create one CTA observation
+
+    Copied from ctools/scripts/obsutils.py and modified a bit.
+    """
+    # Allocate CTA observation
+    obs = gammalib.GCTAObservation()
+
+    # Set pointing direction
+    pntdir = gammalib.GSkyDir()
+    pntdir.radec_deg(RA, DEC)
+
+    pnt = gammalib.GCTAPointing()
+    pnt.dir(pntdir)
+    obs.pointing(pnt)
+
+    # Set ROI
+    roi = gammalib.GCTARoi()
+    instdir = gammalib.GCTAInstDir()
+    instdir.dir(pntdir)
+    roi.centre(instdir)
+    roi.radius(rad)
+
+    # Set GTI
+    gti = gammalib.GGti()
+    start = gammalib.GTime(tstart)
+    stop = gammalib.GTime(tstart + duration)
+    gti.append(start, stop)
+
+    # Set energy boundaries
+    ebounds = gammalib.GEbounds()
+    e_min = gammalib.GEnergy()
+    e_max = gammalib.GEnergy()
+    e_min.TeV(emin)
+    e_max.TeV(emax)
+    ebounds.append(e_min, e_max)
+
+    # Allocate event list
+    events = gammalib.GCTAEventList()
+    events.roi(roi)
+    events.gti(gti)
+    events.ebounds(ebounds)
+    obs.events(events)
+
+    # Set instrument response
+    obs.response(irf, caldb)
+
+    # Set ontime, livetime, and deadtime correction factor
+    obs.ontime(duration)
+    obs.livetime(duration * deadc)
+    obs.deadc(deadc)
+
+    # Return observation
+    return obs
+
 def pipeline():
     """copied from ctools/examples/make_binned_analysis"""
     """
@@ -35,10 +92,6 @@ def pipeline():
     coordsys    = "CEL"
     proj        = "CAR"
 
-    # Initialise timing
-    wall_seconds = 0.0
-    cpu_seconds  = 0.0
-
     # Simulate events
     sim = ctobssim()
     sim["infile"].filename(model_name)
@@ -53,10 +106,6 @@ def pipeline():
     sim["emax"].real(emax)
     sim.run()
     sys.stdout.write("Simulated events ("+str(sim.celapse())+" CPU seconds)\n")
-
-    # Update timing
-    wall_seconds += sim.telapse()
-    cpu_seconds  += sim.celapse()
 
     # Bin events into counts map
     bin = ctbin(sim.obs())
