@@ -26,7 +26,6 @@ class monitor:
     def monitor(self, outfile, cpuinterval):
         """Monitor a given command using a CPU interval of cpuinterval
         and write usage to outfile"""
-        print self.threads
         # The following thread stops when the initial one has come to a halt.
         while self.process.poll() == None:
             try:
@@ -35,7 +34,7 @@ class monitor:
                               index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
                 self.df = self.df.append(s, ignore_index=True)
             except psutil.AccessDenied:
-                print 'Process is over'
+                print 'Process is over for ' + self.threads + ' thread(s)' 
         # write the values into a csv file        
         self.df.to_csv(outfile)
 
@@ -80,7 +79,7 @@ def main():
                         help='If a ctools function that generates a .log file' + 
                         'is being monitored, it should be mentioned here\\ Ex. -fn=ctobssim')
     parser.add_argument('-l', '--loop', default=False, type=bool,
-                        help='if more than one processors is specified, choose wether to\\'
+                        help='if more than one processor is specified, choose whether to\\'
                         + 'loop until the number of maxthreads has been reached\\'
                         + 'or use that number of threads from the start')
     
