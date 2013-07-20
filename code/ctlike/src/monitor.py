@@ -19,14 +19,13 @@ class monitor:
         that will run on nthreads """
         self.threads = nthreads 
         os.environ["OMP_NUM_THREADS"] = str(self.threads)
-        self.process = psutil.Popen(cmd, stdout=subprocess.PIPE)
+        self.process = psutil.Popen(cmd.split(), stdout=subprocess.PIPE)
         self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
     
     def monitor(self, outfile, cpuinterval):
         """Monitor a given command using a CPU interval of cpuinterval
         and write usage to outfile"""
-        print self.threads
         # The following thread stops when the initial one has come to a halt.
         while self.process.poll() == None:
             try:
@@ -35,7 +34,7 @@ class monitor:
                               index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
                 self.df = self.df.append(s, ignore_index=True)
             except psutil.AccessDenied:
-                print 'Process is over'
+                print 'Process is over for ' + str(self.threads) + ' thread(s)'
         # write the values into a csv file        
         self.df.to_csv(outfile)
 
@@ -74,7 +73,7 @@ def main():
                         help='Maximum number of threads for the measurement')
     parser.add_argument('-ti', '--timeinterval', default=0.1,
                         help='The sampling interval at which the CPU measurements should take place')
-    parser.add_argument('cmd', nargs='+',
+    parser.add_argument('cmd', type=str, 
                         help='Command to execute')
     parser.add_argument('-fn', '--function', default='',
                         help='If a ctools function that generates a .log file' + 

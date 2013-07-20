@@ -24,7 +24,6 @@ def main():
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
             ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, nthrd + 1)
-            print nthrd
             ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
             ctobs_monitor.parse_extension(logext='*.log', outname='ctobssim_CPUs=' + str(nthrd+1) + '.csv', time_shift=TIME_ZONE_SHIFT)
     else:
