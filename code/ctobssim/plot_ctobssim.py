@@ -16,7 +16,7 @@ def select_lines(infile, start_time, search_string):
     return result
 
 
-def ctobssim_mplot(my_plotter, ncsv):
+def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
     """
     add and modify a plot instance returned by monitor_plot.mplot
     """
@@ -36,44 +36,46 @@ def ctobssim_mplot(my_plotter, ncsv):
     #         simulation start/endpoints - for CPU usage
     #         write finished - disk IO lines
     # with ax1.fill_between(x=sim_loop, facecolor='red', interpolate=True)
-    for i in xrange(ncsv):
-        df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
-        sim_loop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
-        write_loop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_start', 'write_FILE_done'])
-        
-        the_plot.subplot(411)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(sim_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(413)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(413)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(414)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
+    if log_exists:
+        for i in xrange(ncsv):
+            df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
+            sim_loop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
+            write_loop = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_start', 'write_FILE_done'])
+            
+            the_plot.subplot(411)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(sim_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(413)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(413)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(414)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
     the_plot.savefig("plots/ctobssim_mplot.png")
 
-def ctobssim_speed_up(my_plotter, ncsv):
+def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
     # first we want to plot the general speed up and efficiency
     plt.figure(1)
     my_plotter.speed_up(ncores = ncsv, out_pref='ctobssim_general', figtitle = 'Overall speed up and efficiency for ctobssim')
      
-    # now, we will extract the duration of each simulation and plot the speed up for the parallel regions
-    plt.figure(2)
-    parallel_loop = np.array([])
-    aux = np.array([])
-    for i in xrange(ncsv):
-        df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
-        aux = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
-        parallel_loop = np.append(parallel_loop, aux[1]-aux[0])
-    
-    my_plotter.speed_up(ncores = ncsv, out_pref='ctobssim_parallel', figtitle = 'Parallel region speed up and efficiency for ctobssim', speed_frame=parallel_loop)
+    if log_exists:
+        # now, we will extract the duration of each simulation and plot the speed up for the parallel regions
+        plt.figure(2)
+        parallel_loop = np.array([])
+        aux = np.array([])
+        for i in xrange(ncsv):
+            df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
+            aux = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
+            parallel_loop = np.append(parallel_loop, aux[1]-aux[0])
+        
+        my_plotter.speed_up(ncores = ncsv, out_pref='ctobssim_parallel', figtitle = 'Parallel region speed up and efficiency for ctobssim', speed_frame=parallel_loop)
     
     
 def main():
@@ -84,12 +86,16 @@ def main():
                         help='Number of csv files')
     parser.add_argument('-o', '--outpref', default='',
                         help='Outfile prefix')
+    parser.add_argument('-log', default=False, type=bool,
+                        help='if gammaspeed logging statements have been added to'
+                        + 'ctools and gammalib, this option should be set to True')
+    
     
     args = parser.parse_args()
     
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "ctobssim")
-    ctobssim_mplot(my_plotter, args.nrcsv)
-    ctobssim_speed_up(my_plotter, args.nrcsv)
+    ctobssim_mplot(my_plotter, args.nrcsv, args.log)
+    ctobssim_speed_up(my_plotter, args.nrcsv, args.log)
     
 if __name__ == '__main__':
     main()

@@ -18,6 +18,10 @@ def main():
     parser.add_argument('-ca', '--ctobsargs', default='', type=str,
                         help="Arguments that should be passed to run_multi_ctobssim." 
                          "For more details, see the help of run_multi_ctobssim")
+    parser.add_argument('-log', default=False, type=bool,
+                        help='if gammaspeed logging statements have been added to'
+                        + 'ctools and gammalib, this option should be set to True')
+    
     
     args = parser.parse_args()
     
@@ -25,11 +29,19 @@ def main():
         for nthrd in xrange(int(args.maxthreads)):
             ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, nthrd + 1)
             ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
-            ctobs_monitor.parse_extension(logext='*.log', outname='ctobssim_CPUs=' + str(nthrd+1) + '.csv', time_shift=TIME_ZONE_SHIFT)
+            if args.log:
+                try:
+                    ctobs_monitor.parse_extension(logext='*.log', outname='ctobssim_CPUs=' + str(nthrd+1) + '.csv', time_shift=TIME_ZONE_SHIFT)
+                except ValueError:
+                    print 'no log file(s) found'
     else:
         ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, args.maxthreads)
         ctobs_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
-        ctobs_monitor.parse_extension(str("*.log"), outname='ctobssim_CPUs=' + str(args.maxthreads) + '.csv', time_shift=TIME_ZONE_SHIFT)
-
+        if args.log:
+            try:
+                ctobs_monitor.parse_extension(str("*.log"), outname='ctobssim_CPUs=' + str(args.maxthreads) + '.csv', time_shift=TIME_ZONE_SHIFT)
+            except ValueError:
+                    print 'no log file(s) found'
+            
 if __name__ == '__main__':
     main()
