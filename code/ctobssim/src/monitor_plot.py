@@ -34,6 +34,108 @@ class monitorplot:
        df = pd.read_csv(filename)
        return df
 
+    def CPU_plot(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            
+        for i in xrange(self.ncsv):
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+            
+            plt.plot(df['TIME'].values, df['CPU_USAGE'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('CPU (%)')
+        plt.title('CPU usage for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+        
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()
+            
+    def MEM_plot(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            
+        for i in xrange(self.ncsv):
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+            
+            plt.plot(df['TIME'].values, df['MEM_USAGE'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('RAM usage (MB)')
+        plt.title('Memory usage for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+        
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()
+
+    def IO_cumulative_plot(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            
+        for i in xrange(self.ncsv):
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+        
+            df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'] / int(1e6)
+            plt.plot(df['TIME'].values, df['IO_WRITE_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('IO Write (MB)')
+        plt.title('Write sum for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+            
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()
+               
+    def IO_speed_plot(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            
+        for i in xrange(self.ncsv):
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+                
+            df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'].diff() / df['TIME'].diff() / int(1e6)
+            plt.plot(df['TIME'].values, df['IO_WRITE_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('IO Write (MB/s)')
+        plt.title('Write rate for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+            
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()
+            
     def mplot(self, outfile, figtitle):
         """
         function used to plot the data gathered by monitor.py
@@ -42,54 +144,17 @@ class monitorplot:
         """
         fig = plt.figure(1, figsize=(15.0, 15.0))
         
-        for i in xrange(self.ncsv):
-            df = self.read_monitor_log(i)
-            if i == 0:
-                core_label = '1 core'
-            else:
-                core_label = str(i + 1) + ' cores'
-     
-            plt.subplot(411)
-            df.plot(x='TIME', y='CPU_USAGE', label=core_label)
-            plt.ylabel('CPU (%)')
-            plt.title('CPU usage for ' + self.procname)
-            plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-            plt.legend(loc=0, ncol=self.ncsv / 2)
-            plt.xlabel('Time(s)')
-            [x1, x2, y1, y2] = plt.axis()
-            plt.axis((x1, x2, y1, y2 * 1.1))
-              
-            mem = plt.subplot(412)
-            df.plot(x='TIME', y='MEM_USAGE', label=core_label)
-            plt.ylabel('RAM usage (MB)')
-            plt.title('Memory usage for ' + self.procname)
-            plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-            plt.legend(loc=0, ncol=self.ncsv / 2)
-            plt.xlabel('Time(s)')
-            [x1, x2, y1, y2] = plt.axis()
-            plt.axis((x1, x2, y1, y2 * 1.1))
-             
-            plt.subplot(413)
-            df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'] / int(1e6)
-            iow = df.plot(x='TIME', y='IO_WRITE_BYTES', label=core_label)
-            plt.ylabel('IO Write (MB)')
-            plt.title('Write sum for ' + self.procname)
-            plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-            plt.legend(loc=0, ncol=self.ncsv / 2)
-            plt.xlabel('Time(s)')
-            [x1, x2, y1, y2] = plt.axis()
-            plt.axis((x1, x2, y1, y2 * 1.1))
-             
-            df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'].diff() / df['TIME'].diff()
-            plt.subplot(414)
-            iow = df.plot(x='TIME', y='IO_WRITE_BYTES', label=core_label)
-            plt.ylabel('IO Write (MB/s)')
-            plt.title('Write rate for ' + self.procname)
-            plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-            plt.legend(loc=0, ncol=self.ncsv / 2)
-            plt.xlabel('Time(s)')
-            [x1, x2, y1, y2] = plt.axis()
-            plt.axis((x1, x2, y1, y2 * 1.1))
+        sub1 = plt.subplot(411)
+        self.CPU_plot('', sub1)
+        
+        sub2 = plt.subplot(412)
+        self.MEM_plot('', sub2)
+
+        sub3 = plt.subplot(413)
+        self.IO_cumulative_plot('', sub3)
+
+        sub4 = plt.subplot(414)
+        self.IO_speed_plot('', sub4)
              
         fig.subplots_adjust(hspace=.5)
          
@@ -99,7 +164,9 @@ class monitorplot:
             return plt
         else:
             plt.savefig(outfile + ".png")
-
+            
+        plt.close()
+    
     def speed_up(self, ncores, figtitle, out_pref='', save_plot=True, speed_frame=None):
         """
         function used for plotting the speed up.
@@ -154,8 +221,8 @@ class monitorplot:
             plt.savefig(pltname)
         else:
             return plt
-        
 
+        plt.close()
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

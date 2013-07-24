@@ -6,6 +6,7 @@ import multiprocessing
 import pandas as pd
 import numpy as np 
 from matplotlib import pyplot as plt
+import os
 
 def select_lines(infile, start_time, search_string):
     ctobs = pd.read_csv(infile)
@@ -15,6 +16,12 @@ def select_lines(infile, start_time, search_string):
         result = np.append(result, ctobs[ctobs['EVENT'].str.contains(search_string[i])]['TIME'])    
     return result
 
+def ctobssim_separate_plots(my_plotter, ncsv, log_exists=False):
+    cpu_plot = my_plotter.CPU_plot('plots/CPU')
+    mem_plot = my_plotter.MEM_plot('plots/mem')
+    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul')
+    io_speed_plot = my_plotter.IO_speed_plot('plots/io_speed')
+    
 
 def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
     """
@@ -22,15 +29,6 @@ def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
     """
     
     the_plot = my_plotter.mplot(outfile='', figtitle='ctobssim measurements')
-#     the_plot.hold(True)
-    # Customize plot size
-    the_plot.subplot(411)
-    [x1, x2, y1, y2] = the_plot.axis()
-    the_plot.axis((x1, x2, y1, y2 * 3.1))
-    
-    the_plot.subplot(412)
-    [x1, x2, y1, y2] = the_plot.axis()
-    the_plot.axis((x1, x2, y1, y2 * 1.5))
     
     # TODO: Add vertical lines for
     #         simulation start/endpoints - for CPU usage
@@ -61,7 +59,7 @@ def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
     if not os.path.exists('plots'):
         os.makedirs('plots')
         print 'Made directory plots/'
-    the_plot.savefig("plots/ctobssim_mplot.png")
+    
 
 def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
     # first we want to plot the general speed up and efficiency
@@ -99,6 +97,7 @@ def main():
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "ctobssim")
     ctobssim_mplot(my_plotter, args.nrcsv, args.log)
     ctobssim_speed_up(my_plotter, args.nrcsv, args.log)
+    ctobssim_separate_plots(my_plotter, args.nrcsv, args.log)
     
 if __name__ == '__main__':
     main()
