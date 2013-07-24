@@ -16,7 +16,7 @@ def select_lines(infile, start_time, search_string):
     return result
 
 
-def pipeline_mplot(my_plotter, ncsv):
+def pipeline_mplot(my_plotter, ncsv, log_exists):
     """
     add and modify a plot instance returned by monitor_plot.mplot
     """
@@ -31,34 +31,37 @@ def pipeline_mplot(my_plotter, ncsv):
     [x1, x2, y1, y2] = the_plot.axis()
     the_plot.axis((x1, x2, y1, y2 * 1.5))
     
-    # TODO: Add vertical lines for
-    #         simulation start/endpoints - for CPU usage
-    #         write finished - disk IO lines
-    # with ax1.fill_between(x=sim_loop, facecolor='red', interpolate=True)
-    for i in xrange(ncsv):
-        df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
-        sim_loop = select_lines('pipeline_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
-        write_loop = select_lines('pipeline_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_start', 'write_FILE_done'])
-        
-        the_plot.subplot(411)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(sim_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(413)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(413)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
-        the_plot.subplot(414)
-        [x1, x2, y1, y2] = the_plot.axis()
-        the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
-        
+    if log_exists:
+        # TODO: Add vertical lines for
+        #         simulation start/endpoints - for CPU usage
+        #         write finished - disk IO lines
+        # with ax1.fill_between(x=sim_loop, facecolor='red', interpolate=True)
+        for i in xrange(ncsv):
+            df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
+            sim_loop = select_lines('pipeline_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
+            write_loop = select_lines('pipeline_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['write_FILE_start', 'write_FILE_done'])
+            
+            the_plot.subplot(411)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(sim_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(413)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(413)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
+            the_plot.subplot(414)
+            [x1, x2, y1, y2] = the_plot.axis()
+            the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
+            
+    if not os.path.exists('plots'):
+        os.makedirs('plots')
     the_plot.savefig("plots/pipeline_mplot.png")
 
-def pipeline_speed_up(my_plotter, ncsv):
+def pipeline_speed_up(my_plotter, ncsv, log_exists):
     # first we want to plot the general speed up and efficiency
     plt.figure(1)
     my_plotter.speed_up(ncores = ncsv, out_pref='pipeline_general', figtitle = 'Overall speed up and efficiency for pipeline execution')
@@ -83,12 +86,15 @@ def main():
                         help='Number of csv files')
     parser.add_argument('-o', '--outpref', default='',
                         help='Outfile prefix')
+    parser.add_argument('-log', default=False, type=bool,
+                        help='if gammaspeed logging statements have been added to'
+                        + 'ctools and gammalib, this option should be set to True')
     
     args = parser.parse_args()
     
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "pipeline")
-    pipeline_mplot(my_plotter, args.nrcsv)
-    pipeline_speed_up(my_plotter, args.nrcsv)
+    pipeline_mplot(my_plotter, args.nrcsv, args.log)
+    pipeline_speed_up(my_plotter, args.nrcsv, args.log)
     
 if __name__ == '__main__':
     main()

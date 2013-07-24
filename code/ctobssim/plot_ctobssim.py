@@ -58,6 +58,9 @@ def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
             [x1, x2, y1, y2] = the_plot.axis()
             the_plot.vlines(write_loop, ymin=y1, ymax=y2, colors='m')
             
+    if not os.path.exists('plots'):
+        os.makedirs('plots')
+        print 'Made directory plots/'
     the_plot.savefig("plots/ctobssim_mplot.png")
 
 def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
