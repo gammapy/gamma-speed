@@ -206,7 +206,7 @@ class monitorplot:
             cores = [i + 1 for i in range(ncores)]
             times = pd.Series(index=cores)
             for i in xrange(int(ncores)):
-                df = self.read_gammalib_log(i)
+                df = self.read_monitor_log(i)
                 # time spent for the whole process
                 times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
                 

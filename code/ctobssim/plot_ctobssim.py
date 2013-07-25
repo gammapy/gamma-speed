@@ -77,7 +77,7 @@ def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
         aux = np.array([])
         for i in xrange(ncsv):
             df = pd.read_csv(my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
-            aux = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:libraries_loaded', 'gammaspeed:events_simulated'])
+            aux = select_lines('ctobssim_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:parallel_region_start', 'gammaspeed:parallel_region_end'])
             parallel_loop = np.append(parallel_loop, aux[1]-aux[0])
         
         my_plotter.speed_up(ncores = ncsv, out_pref='ctobssim_parallel', figtitle = 'Parallel region speed up and efficiency for ctobssim', speed_frame=parallel_loop)
