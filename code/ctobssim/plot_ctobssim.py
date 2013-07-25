@@ -17,6 +17,9 @@ def select_lines(infile, start_time, search_string):
     return result
 
 def ctobssim_separate_plots(my_plotter, ncsv, log_exists=False):
+    """
+    this function makes separate plots for CPU, memory and disk IO usage
+    """
     cpu_plot = my_plotter.CPU_plot('plots/CPU')
     mem_plot = my_plotter.MEM_plot('plots/mem')
     io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul')
@@ -60,6 +63,7 @@ def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
         os.makedirs('plots')
         print 'Made directory plots/'
     
+    the_plot.close()
 
 def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
     # first we want to plot the general speed up and efficiency

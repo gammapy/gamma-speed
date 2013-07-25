@@ -37,8 +37,15 @@ class monitorplot:
     def CPU_plot(self, outfile, ax=None):
         if ax is None:
             ax=plt.gca()
-            
-        for i in xrange(self.ncsv):
+            fig = plt.figure(2, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
@@ -62,8 +69,15 @@ class monitorplot:
     def MEM_plot(self, outfile, ax=None):
         if ax is None:
             ax=plt.gca()
-            
-        for i in xrange(self.ncsv):
+            fig = plt.figure(3, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
@@ -87,8 +101,15 @@ class monitorplot:
     def IO_cumulative_plot(self, outfile, ax=None):
         if ax is None:
             ax=plt.gca()
-            
-        for i in xrange(self.ncsv):
+            fig = plt.figure(4, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
@@ -113,8 +134,15 @@ class monitorplot:
     def IO_speed_plot(self, outfile, ax=None):
         if ax is None:
             ax=plt.gca()
-            
-        for i in xrange(self.ncsv):
+            fig = plt.figure(5, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:            
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
