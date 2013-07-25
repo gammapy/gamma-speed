@@ -41,7 +41,7 @@ class monitorplot:
         
         if self.ncsv > 4:
             sel_vals = range(0, self.ncsv, self.ncsv/4)
-            sel_vals.append(self.ncsv)
+            sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
         
@@ -73,7 +73,7 @@ class monitorplot:
         
         if self.ncsv > 4:
             sel_vals = range(0, self.ncsv, self.ncsv/4)
-            sel_vals.append(self.ncsv)
+            sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
         
@@ -105,7 +105,7 @@ class monitorplot:
         
         if self.ncsv > 4:
             sel_vals = range(0, self.ncsv, self.ncsv/4)
-            sel_vals.append(self.ncsv)
+            sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
         
@@ -138,7 +138,7 @@ class monitorplot:
         
         if self.ncsv > 4:
             sel_vals = range(0, self.ncsv, self.ncsv/4)
-            sel_vals.append(self.ncsv)
+            sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
         

@@ -63,6 +63,7 @@ def ctobssim_mplot(my_plotter, ncsv, log_exists=False):
         os.makedirs('plots')
         print 'Made directory plots/'
     
+    the_plot.savefig('plots/ctobssim_mplot.png')    
     the_plot.close()
 
 def ctobssim_speed_up(my_plotter, ncsv, log_exists=False):
