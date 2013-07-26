@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-mt', '--maxthreads', default=multiprocessing.cpu_count(),
                         type=int, help='Maximum number of threads for the measurement')
-    parser.add_argument('-l', '--loop', default=True, type=bool,
+    parser.add_argument('-l', '--loop', default=False, type=bool,
                         help='if more than one processors is specified, choose wether to\\'
                         + 'loop until the number of maxthreads has been reached\\'
                         + 'or use that number of threads from the start')
@@ -23,8 +23,8 @@ def main():
                         + 'ctools and gammalib, this option should be set to True')
     
     args = parser.parse_args()
-    
-    if(args.loop):
+
+    if args.loop:
         for nthrd in xrange(int(args.maxthreads)):
             pipe_monitor = mt.monitor("./run_pipeline.py" + args.pipeargs, nthrd + 1)
             pipe_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
@@ -32,6 +32,7 @@ def main():
                 try:
                     pipe_monitor.parse_extension(logext='*.log', outname='pipeline_CPUs=' + str(nthrd+1) + '.csv', time_shift=TIME_ZONE_SHIFT)
                 except ValueError:
+                    print 'no log file(s) found'
                     pass
                     
     else:

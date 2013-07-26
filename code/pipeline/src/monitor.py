@@ -34,7 +34,7 @@ class monitor:
                               index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
                 self.df = self.df.append(s, ignore_index=True)
             except psutil.AccessDenied:
-                print 'Process is over for ' + str(self.threads) + ' thread(s)' 
+                print 'Process is over for ' + str(self.threads) + ' thread(s)'
         # write the values into a csv file        
         self.df.to_csv(outfile)
 
@@ -79,7 +79,7 @@ def main():
                         help='If a ctools function that generates a .log file' + 
                         'is being monitored, it should be mentioned here\\ Ex. -fn=ctobssim')
     parser.add_argument('-l', '--loop', default=False, type=bool,
-                        help='if more than one processor is specified, choose whether to\\'
+                        help='if more than one processors is specified, choose wether to\\'
                         + 'loop until the number of maxthreads has been reached\\'
                         + 'or use that number of threads from the start')
     

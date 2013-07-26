@@ -6,6 +6,7 @@ import multiprocessing
 import pandas as pd
 import numpy as np 
 from matplotlib import pyplot as plt
+import os
 
 def select_lines(infile, start_time, search_string):
     ctobs = pd.read_csv(infile)
@@ -15,21 +16,21 @@ def select_lines(infile, start_time, search_string):
         result = np.append(result, ctobs[ctobs['EVENT'].str.contains(search_string[i])]['TIME'])    
     return result
 
-
+def pipeline_separate_plots(my_plotter, ncsv, log_exists=False):
+    """
+    this function makes separate plots for CPU, memory and disk IO usage
+    """
+    cpu_plot = my_plotter.CPU_plot('plots/CPU')
+    mem_plot = my_plotter.MEM_plot('plots/mem')
+    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul')
+    io_speed_plot = my_plotter.IO_speed_plot('plots/io_speed')
+    
 def pipeline_mplot(my_plotter, ncsv, log_exists):
     """
     add and modify a plot instance returned by monitor_plot.mplot
     """
     
     the_plot = my_plotter.mplot(outfile='', figtitle='pipeline measurement')
-    # Customize plot size
-    the_plot.subplot(411)
-    [x1, x2, y1, y2] = the_plot.axis()
-    the_plot.axis((x1, x2, y1, y2 * 3.1))
-    
-    the_plot.subplot(412)
-    [x1, x2, y1, y2] = the_plot.axis()
-    the_plot.axis((x1, x2, y1, y2 * 1.5))
     
     if log_exists:
         # TODO: Add vertical lines for
@@ -95,6 +96,7 @@ def main():
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "pipeline")
     pipeline_mplot(my_plotter, args.nrcsv, args.log)
     pipeline_speed_up(my_plotter, args.nrcsv, args.log)
+    pipeline_separate_plots(my_plotter, args.nrcsv, args.log)
     
 if __name__ == '__main__':
     main()
