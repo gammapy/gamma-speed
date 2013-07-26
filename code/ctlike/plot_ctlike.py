@@ -16,16 +16,16 @@ def select_lines(infile, start_time, search_string):
         result = np.append(result, ctobs[ctobs['EVENT'].str.contains(search_string[i])]['TIME'])    
     return result
 
-def ctlike_separate_plots(my_plotter, ncsv, log_exists=False):
+def ctlike_separate_plots(my_plotter, ncsv, outpref, log_exists=False):
     """
     this function makes separate plots for CPU, memory and disk IO usage
     """
-    cpu_plot = my_plotter.CPU_plot('plots/CPU')
-    mem_plot = my_plotter.MEM_plot('plots/mem')
-    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul')
-    io_speed_plot = my_plotter.IO_speed_plot('plots/io_speed')
+    cpu_plot = my_plotter.CPU_plot('plots/'+outpref+'CPU')
+    mem_plot = my_plotter.MEM_plot('plots/'+outpref+'mem')
+    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/'+outpref+'io_cumul')
+    io_speed_plot = my_plotter.IO_speed_plot('plots/'+outpref+'io_speed')
 
-def ctlike_mplot(my_plotter, ncsv, log_exists):
+def ctlike_mplot(my_plotter, ncsv, outpref, log_exists):
     """
     add and modify a plot instance returned by monitor_plot.mplot
     """
@@ -62,13 +62,13 @@ def ctlike_mplot(my_plotter, ncsv, log_exists):
         os.makedirs('plots')
         print 'Made directory plots/'
         
-    the_plot.savefig("plots/ctlike_mplot.png")
+    the_plot.savefig("plots/" +outpref+"ctlike_mplot.png")
     the_plot.close()
     
-def ctlike_speed_up(my_plotter, ncsv, log_exists):
+def ctlike_speed_up(my_plotter, ncsv, outpref, log_exists=False):
     # first we want to plot the general speed up and efficiency
     plt.figure(1)
-    my_plotter.speed_up(ncores = ncsv, out_pref='ctlike_general', figtitle = 'Overall speed up and efficiency for ctlike')
+    my_plotter.speed_up(ncores = ncsv, out_pref=outpref+'_general', figtitle = 'Overall speed up and efficiency for ctlike')
         
     if log_exists: 
         # now, we will extract the duration of each simulation and plot the speed up for the parallel regions
@@ -80,7 +80,7 @@ def ctlike_speed_up(my_plotter, ncsv, log_exists):
             aux = select_lines('ctlike_CPUs=' + str(i + 1) + '.csv', df.at[0, 'TIME'], ['gammaspeed:parallel_region_start', 'gammaspeed:parallel_region_end'])
             parallel_loop = np.append(parallel_loop, aux[1]-aux[0])
         
-        my_plotter.speed_up(ncores = ncsv, out_pref='ctlike_parallel', figtitle = 'Parallel region speed up and efficiency for ctlike', speed_frame=parallel_loop)
+        my_plotter.speed_up(ncores = ncsv, out_pref=outpref+'_parallel', figtitle = 'Parallel region speed up and efficiency for ctlike', speed_frame=parallel_loop)
         
     
 def main():
@@ -89,7 +89,7 @@ def main():
                         help='Input file name - prefix')
     parser.add_argument('-n', '--nrcsv', default=multiprocessing.cpu_count(), type=int,
                         help='Number of csv files')
-    parser.add_argument('-o', '--outpref', default='',
+    parser.add_argument('-o', '--outpref', default='ctlike',
                         help='Outfile prefix')
     parser.add_argument('-log', default=False, type=bool,
                         help='if gammaspeed logging statements have been added to'
@@ -98,9 +98,10 @@ def main():
     args = parser.parse_args()
     
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "ctlike")
-    ctlike_mplot(my_plotter, args.nrcsv, args.log)
-    ctlike_speed_up(my_plotter, args.nrcsv, args.log)
-    ctlike_separate_plots(my_plotter, args.nrcsv, args.log)
+    ctlike_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
+    ctlike_separate_plots(my_plotter, args.nrcsv, args.outpref, args.log)
+    ctlike_speed_up(my_plotter, args.nrcsv, args.outpref, args.log)
+    
     
 if __name__ == '__main__':
     main()

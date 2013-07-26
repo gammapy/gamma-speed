@@ -101,8 +101,9 @@ def main():
     
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "ctobssim")
     ctobssim_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
-    ctobssim_speed_up(my_plotter, args.nrcsv, args.outpref, args.log)
     ctobssim_separate_plots(my_plotter, args.nrcsv, args.outpref, args.log)
+    ctobssim_speed_up(my_plotter, args.nrcsv, args.outpref, args.log)
+    
     
 if __name__ == '__main__':
     main()
