@@ -11,16 +11,22 @@ mkdir plots/10_OBS_DATA
 cp *.csv plots/10_OBS_DATA
 cp *.log plots/10_OBS_DATA
 
+./monitor_ctobssim.py -log=True --loop=True -ca=" -dur=1800 -nobs=50"
+./plot_ctobssim.py -log=True -o="ctobssim_50OBS_"
+mkdir plots/50_OBS_DATA
+cp *.csv plots/50_OBS_DATA
+cp *.log plots/50_OBS_DATA
+
 ./monitor_ctobssim.py -log=True --loop=True -ca=" -dur=1800 -nobs=100"
 ./plot_ctobssim.py -log=True -o="ctobssim_100OBS_"
 mkdir plots/100_OBS_DATA
 cp *.csv plots/100_OBS_DATA
 cp *.log plots/100_OBS_DATA
 
-./monitor_ctobssim.py -log=True --loop=True -ca=" -dur=1800 -nobs=1000"
-./plot_ctobssim.py -log=True -o="ctobssim_1000OBS_"
-mkdir plots/1000_OBS_DATA
-cp *.csv plots/1000_OBS_DATA
-cp *.log plots/1000_OBS_DATA
+./monitor_ctobssim.py -log=True --loop=True -ca=" -dur=1800 -nobs=200"
+./plot_ctobssim.py -log=True -o="ctobssim_200OBS_"
+mkdir plots/200_OBS_DATA
+cp *.csv plots/200_OBS_DATA
+cp *.log plots/200_OBS_DATA
 
 rm -r *.fits *.csv *.log *.xml
