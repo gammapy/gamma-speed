@@ -16,16 +16,19 @@ def select_lines(infile, start_time, search_string):
         result = np.append(result, ctobs[ctobs['EVENT'].str.contains(search_string[i])]['TIME'])    
     return result
 
-def pipeline_separate_plots(my_plotter, ncsv, log_exists=False):
+def pipeline_separate_plots(my_plotter, ncsv, outpref, log_exists=False):
     """
     this function makes separate plots for CPU, memory and disk IO usage
     """
-    cpu_plot = my_plotter.CPU_plot('plots/CPU')
-    mem_plot = my_plotter.MEM_plot('plots/mem')
-    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul')
-    io_speed_plot = my_plotter.IO_speed_plot('plots/io_speed')
-    
-def pipeline_mplot(my_plotter, ncsv, log_exists):
+    cpu_plot = my_plotter.CPU_plot('plots/CPU' + outpref)
+    mem_plot = my_plotter.MEM_plot('plots/mem' + outpref)
+    io_cumul_plot = my_plotter.IO_cumulative_plot('plots/io_cumul' + outpref)
+    io_speed_plot = my_plotter.IO_speed_plot('plots/io_speed' + outpref)
+
+# def pipeline_bar_plot():
+#     
+#     
+def pipeline_mplot(my_plotter, ncsv, outpref, log_exists):
     """
     add and modify a plot instance returned by monitor_plot.mplot
     """
@@ -62,10 +65,10 @@ def pipeline_mplot(my_plotter, ncsv, log_exists):
         os.makedirs('plots')
     the_plot.savefig("plots/pipeline_mplot.png")
 
-def pipeline_speed_up(my_plotter, ncsv, log_exists):
+def pipeline_speed_up(my_plotter, ncsv, outpref, log_exists):
     # first we want to plot the general speed up and efficiency
     plt.figure(1)
-    my_plotter.speed_up(ncores = ncsv, out_pref='pipeline_general', figtitle = 'Overall speed up and efficiency for pipeline execution')
+    my_plotter.speed_up(ncores = ncsv, out_pref='pipeline_general' + outpref, figtitle = 'Overall speed up and efficiency for pipeline execution')
      
     # now, we will extract the duration of each simulation and plot the speed up for the parallel regions
 #     plt.figure(2)
@@ -94,9 +97,9 @@ def main():
     args = parser.parse_args()
     
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, "pipeline")
-    pipeline_mplot(my_plotter, args.nrcsv, args.log)
-    pipeline_speed_up(my_plotter, args.nrcsv, args.log)
-    pipeline_separate_plots(my_plotter, args.nrcsv, args.log)
+    pipeline_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
+    pipeline_speed_up(my_plotter, args.nrcsv,args.outpref, args.log)
+    pipeline_separate_plots(my_plotter, args.nrcsv,args.outpref, args.log)
     
 if __name__ == '__main__':
     main()

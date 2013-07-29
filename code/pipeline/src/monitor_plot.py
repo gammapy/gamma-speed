@@ -164,6 +164,39 @@ class monitorplot:
             plt.savefig(outfile + ".png")
             plt.close()
             
+    def IO_read(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            fig = plt.figure(5, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv - 1)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:            
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+                
+            df['IO_READ_BYTES'] = df['IO_READ_BYTES'].diff() / df['TIME'].diff() / int(1e6)
+            plt.plot(df['TIME'].values, df['IO_READ_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('I\O Read (MB/s)')
+        plt.title('Read rate for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+            
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()  
+            
     def mplot(self, outfile, figtitle):
         """
         function used to plot the data gathered by monitor.py
@@ -179,7 +212,7 @@ class monitorplot:
         self.MEM_plot('', sub2)
 
         sub3 = plt.subplot(413)
-        self.IO_cumulative_plot('', sub3)
+        self.IO_read('', sub3)
 
         sub4 = plt.subplot(414)
         self.IO_speed_plot('', sub4)
