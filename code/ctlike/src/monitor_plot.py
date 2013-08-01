@@ -163,7 +163,142 @@ class monitorplot:
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
+    
+    def IO_read(self, outfile, ax=None):
+        if ax is None:
+            ax=plt.gca()
+            fig = plt.figure(5, figsize=(15.0, 15.0))
+        
+        if self.ncsv > 4:
+            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals.append(self.ncsv - 1)
+        else:
+            sel_vals = xrange(self.ncsv)
+        
+        for i in sel_vals:            
+            df = self.read_monitor_log(i)
+            if i == 0:
+                core_label = '1 core'
+            else:
+                core_label = str(i + 1) + ' cores'
+                
+            df['IO_READ_BYTES'] = df['IO_READ_BYTES'].diff() / df['TIME'].diff() / int(1e6)
+            plt.plot(df['TIME'].values, df['IO_READ_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+        plt.ylabel('I\O Read (MB/s)')
+        plt.title('Read rate for ' + self.procname)
+        plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        plt.legend(loc=0, ncol=self.ncsv / 2)
+        plt.xlabel('Time(s)')
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
             
+        if outfile is not '':
+            plt.savefig(outfile + ".png")
+            plt.close()
+                 
+    def times_bar(self, outfile='', ax=None, speed_frame=None):
+        if ax is None:
+            ax=plt.gca()
+            fig = plt.figure(6, figsize=(5.0, 15.0))
+        
+        cores = [i + 1 for i in range(self.ncsv)]
+            
+        if speed_frame is None:
+            times = pd.Series(index=cores)
+            for i in xrange(int(self.ncsv)):
+                df = self.read_monitor_log(i)
+                # time spent for the whole process
+                times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
+        else:
+            times = speed_frame
+            
+        times.plot(kind='bar', label = 'Execution time', axes=ax)
+        plt.ylabel('Time(s)')
+        plt.xlabel('Number of cores')
+        plt.title('Execution time for' + self.procname)
+        ax.set_xlim(left=0, right=self.ncsv + 1)
+        ax.set_ylim(bottom=0)
+        xa = ax.get_xaxis()
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+        plt.legend(loc=0)
+
+        if outfile is not '':
+            plt.savefig(outfile + '.png')
+            plt.close()
+        
+    def speed_plot(self, outfile='', ax=None, speed_frame=None, amdahl_frame=None):
+        if ax is None:
+            ax=plt.gca()
+            fig = plt.figure(7, figsize=(5.0, 15.0))
+            
+        if speed_frame is None:
+            cores = [i + 1 for i in range(self.ncsv)]
+            times = pd.Series(index=cores)
+            for i in xrange(int(self.ncsv)):
+                df = self.read_monitor_log(i)
+                # time spent for the whole process
+                times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
+
+            speed = pd.Series(data=times[1] / times, index=cores)
+        else:
+            speed = speed_frame[1] / speed_frame
+            
+        speed.plot(color='g', marker='.', ls='-', ms=15.0, mec='r',label='Measured values')
+        if amdahl_frame is not None:
+            amdahl_frame.plot(color='b', ls='-', label='Amdahl\'s Law')
+        plt.ylabel('Speed-up')
+        plt.xlabel('Number of cores')
+        plt.title('Speed-up for' + self.procname)
+        ax.set_xlim(left=0, right=self.ncsv + 1)
+        ax.set_ylim(bottom=0)
+        xa = ax.get_xaxis()
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+        plt.legend(loc=0)
+        
+        if outfile is not '':
+            plt.savefig(outfile + '.png')
+            plt.close()
+        
+    def eff_plot(self, outfile='', ax=None, speed_frame=None, amdahl_frame=None):
+        if ax is None:
+            ax=plt.gca()
+            fig = plt.figure(8, figsize=(5.0, 15.0))
+            
+        if speed_frame is None:
+            cores = [i + 1 for i in range(self.ncsv)]
+            times = pd.Series(index=cores)
+            for i in xrange(int(self.ncsv)):
+                df = self.read_monitor_log(i)
+                # time spent for the whole process
+                times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
+
+            eff = pd.Series(data=times[1] / times, index=cores) / cores
+        else:
+            cores = [i + 1 for i in range(self.ncsv)]
+            eff = speed_frame[1] / speed_frame / cores
+            
+        eff.plot(color='r', marker='.', ls='-', ms=15.0, mec='g', label='Measured values')
+        
+        if amdahl_frame is not None:
+            amdahl_eff = amdahl_frame / cores
+            amdahl_eff.plot(color='b', ls='-', label='Amdahl\'s Law')
+        plt.ylabel('Efficiency')
+        plt.xlabel('Number of cores')
+        plt.title('Efficiency for' + self.procname)
+        ax.set_xlim(left=0, right=self.ncsv + 1)
+        ax.set_ylim(bottom=0)
+        xa = ax.get_xaxis()
+        [x1, x2, y1, y2] = plt.axis()
+        plt.axis((x1, x2, y1, y2 * 1.1))
+        plt.legend(loc=0)
+        
+        if outfile is not '':
+            plt.savefig(outfile + '.png')
+            plt.close()
+        
     def mplot(self, outfile, figtitle):
         """
         function used to plot the data gathered by monitor.py
@@ -179,7 +314,7 @@ class monitorplot:
         self.MEM_plot('', sub2)
 
         sub3 = plt.subplot(413)
-        self.IO_cumulative_plot('', sub3)
+        self.IO_read('', sub3)
 
         sub4 = plt.subplot(414)
         self.IO_speed_plot('', sub4)
@@ -188,67 +323,45 @@ class monitorplot:
          
         fig.suptitle(figtitle)
         
-        if outfile=='':
-            return plt
-        else:
+        if outfile is not '':
             plt.savefig(outfile + ".png")
-            
+        else:
+            return plt
         plt.close()
     
-    def speed_up(self, ncores, figtitle, out_pref='', save_plot=True, speed_frame=None):
+    def splot(self, figtitle, outfile='', speed_frame=None, amdahl_frame=None):
         """
         function used for plotting the speed up.
         If speed_frame is defined and contains other time values than the total ones,
         the default method for aquiring data is overriden and the new values are plotted instead.
         (int ncores, str out_pref, boolean save_plot, pandas.DataFrame speed_frame)
         """
-        if speed_frame==None:
-            cores = [i + 1 for i in range(ncores)]
+        if speed_frame is None:
+            cores = [i + 1 for i in range(self.ncsv)]
             times = pd.Series(index=cores)
-            for i in xrange(int(ncores)):
+            for i in xrange(int(self.ncsv)):
                 df = self.read_monitor_log(i)
                 # time spent for the whole process
-                times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
-                
-            speed = pd.Series(data=times[1] / times, index=cores)
-            eff = speed / cores
+                times[i+1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
         else:
-            cores = [i + 1 for i in range(ncores)]
-            speed = pd.Series(data=speed_frame[0] / speed_frame, index=cores)
-            eff = speed / cores
-            
+            times = speed_frame
         #plot style definitions
-        speedfig = plt.figure()
-        axes = plt.subplot(211)
-        speedP = speed.plot(color='g', marker='.', ls='-', ms=15.0, mec='r')
-        plt.ylabel('Speed-up factor (relative)')
-        plt.xlabel('Number of cores')
-        plt.title('Speed-up for ' + self.procname)
-        axes.set_xlim(left=0, right=ncores + 1)
-        axes.set_ylim(bottom=0)
-        xa = axes.get_xaxis()
-#         xa.set_major_locator(MaxNLocator(integer=True))
+        speedfig = plt.figure(figsize=(15.0,15.0))
+        sub1 = plt.subplot(311)
+        self.times_bar('', ax=sub1, speed_frame=times)
         
-        
-        axes = plt.subplot(212)
-        eff.plot(color='r', marker='.', ls='-', ms=15.0, mec='g')
-        plt.ylabel('Efficiency (relative)')
-        plt.xlabel('Number of cores')
-        plt.title('Efficiency for ctobssim' + self.procname)
-        axes.set_xlim(left=0, right=ncores + 1)
-        axes.set_ylim(bottom=0, top=1.2)
-        xa = axes.get_xaxis()
-#         xa.set_major_locator(MaxNLocator(integer=True))
+        sub2 = plt.subplot(312)
+        self.speed_plot('', sub2, times, amdahl_frame)
+                
+        sub3 = plt.subplot(313)
+        self.eff_plot('', sub3, times, amdahl_frame)
         
         speedfig.subplots_adjust(hspace=.5)
 
-        pltname='plots/' + out_pref + '_speed_up.png'
         speedfig.suptitle(figtitle)
             
-        if save_plot:
-            plt.savefig(pltname)
-        else:
-            return plt
+        if outfile is not '':
+            plt.savefig(outfile + '.png')
 
         plt.close()
 
@@ -267,6 +380,7 @@ def main():
     my_mplot = monitorplot(args.infile, args.nrcsv, args.function)
     my_mplot.mplot(outfile='plots/' + args.out_pref + '_' + args.function + '_' + platform.node(),
            figtitle='Machine: ' + platform.node())
-
+    my_mplot.splot('Machine: ' + platform.node(), 'plots/' + args.out_pref + '_' + args.function + '_' + platform.node() + 'speed_up', None, None)
+    
 if __name__ == '__main__':
     main()
