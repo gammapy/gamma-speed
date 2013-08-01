@@ -19,9 +19,8 @@ class monitor:
         that will run on nthreads """
         self.threads = nthreads 
         os.environ["OMP_NUM_THREADS"] = str(self.threads)
-        self.outlog = open('stdout' + str(nthreads) + '.log', "w")
-        self.process = psutil.Popen(cmd.split(), stdout=self.outlog)
-        self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
+        self.process = psutil.Popen(cmd.split(), stdout=subprocess.PIPE)
+        self.df = pd.DataFrame(columns=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_READ_BYTES', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
         self.name = self.process.name
     
     def monitor(self, outfile, cpuinterval):
@@ -31,14 +30,13 @@ class monitor:
         while self.process.poll() == None:
             try:
                 s = pd.Series([self.process.get_cpu_percent(interval=float(cpuinterval)), self.process.get_memory_info()[1],
-                               self.process.get_io_counters ()[0], self.process.get_io_counters ()[1], self.process.get_io_counters ()[3], self.name, time.time()],
-                              index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
+                               self.process.get_io_counters ()[0], self.process.get_io_counters ()[2], self.process.get_io_counters ()[1],  self.process.get_io_counters ()[3], self.name, time.time()],
+                              index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS', 'IO_READ_BYTES', 'IO_WRITE_COUNTS', 'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
                 self.df = self.df.append(s, ignore_index=True)
             except psutil.AccessDenied:
                 print 'Process is over for ' + str(self.threads) + ' thread(s)'
         # write the values into a csv file        
         self.df.to_csv(outfile)
-        self.outlog.flush()
 
     def parse_time(self, time_s, time_shift ):
         """parse the time for a GLog entry into second since the epoch"""
