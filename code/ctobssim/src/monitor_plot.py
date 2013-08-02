@@ -15,44 +15,67 @@ import multiprocessing
 import numpy as np
 import platform
 
+
 class monitorplot:
+
     def __init__(self, infile, ncsv, procname):
+        """
+        initates the plotter for a certain infile prefix,
+        ncsv number of csv files and a process name
+        """
         self.infile = infile
         self.ncsv = ncsv
         self.procname = procname
-        
+
     def read_monitor_log(self, current_CPU_count):
+        """
+        used to read the monitor.py output files
+        """
         filename = self.infile + "_CPUs=" + str(current_CPU_count + 1) + ".csv"
         df = pd.read_csv(filename)
         name = df.at[1, 'PROCESS_NAME']
         df['MEM_USAGE'] = df['MEM_USAGE'] / int(1e6)
         df['TIME'] = df['TIME'] - df.at[0, 'TIME']
         return df
-        
-    def read_gammalib_log(self, current_CPU_count):     
-       filename = self.procname + "_CPUs=" + str(current_CPU_count + 1) + ".csv"
-       df = pd.read_csv(filename)
-       return df
+
+    def read_gammalib_log(self, current_CPU_count):
+        """
+        used to read ctools and gammalib log output files
+        """
+        filename = self.procname + "_CPUs=" + \
+            str(current_CPU_count + 1) + ".csv"
+        df = pd.read_csv(filename)
+        return df
 
     def CPU_plot(self, outfile, ax=None):
+        """"
+        plot CPU usage.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(2, figsize=(15.0, 15.0))
-        
+
         if self.ncsv > 4:
-            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals = range(0, self.ncsv, self.ncsv / 4)
             sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
-        
+
         for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
             else:
                 core_label = str(i + 1) + ' cores'
-            
-            plt.plot(df['TIME'].values, df['CPU_USAGE'].values, label=core_label, hold=True, axes=ax)
+
+            plt.plot(
+                df['TIME'].values,
+                df['CPU_USAGE'].values,
+                label=core_label,
+                hold=True,
+                axes=ax)
 
         plt.ylabel('CPU (%)')
         plt.title('CPU usage for ' + self.procname)
@@ -61,30 +84,40 @@ class monitorplot:
         plt.xlabel('Time(s)')
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
-        
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
-            
+
     def MEM_plot(self, outfile, ax=None):
+        """"
+        plot memory usage.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(3, figsize=(15.0, 15.0))
-        
+
         if self.ncsv > 4:
-            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals = range(0, self.ncsv, self.ncsv / 4)
             sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
-        
+
         for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
             else:
                 core_label = str(i + 1) + ' cores'
-            
-            plt.plot(df['TIME'].values, df['MEM_USAGE'].values, label=core_label, hold=True, axes=ax)
+
+            plt.plot(
+                df['TIME'].values,
+                df['MEM_USAGE'].values,
+                label=core_label,
+                hold=True,
+                axes=ax)
 
         plt.ylabel('RAM usage (MB)')
         plt.title('Memory usage for ' + self.procname)
@@ -93,31 +126,41 @@ class monitorplot:
         plt.xlabel('Time(s)')
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
-        
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
 
     def IO_cumulative_plot(self, outfile, ax=None):
+        """"
+        plot cumulative IO write.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(4, figsize=(15.0, 15.0))
-        
+
         if self.ncsv > 4:
-            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals = range(0, self.ncsv, self.ncsv / 4)
             sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
-        
+
         for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
             else:
                 core_label = str(i + 1) + ' cores'
-        
+
             df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'] / int(1e6)
-            plt.plot(df['TIME'].values, df['IO_WRITE_BYTES'].values, label=core_label, hold=True, axes=ax)
+            plt.plot(
+                df['TIME'].values,
+                df['IO_WRITE_BYTES'].values,
+                label=core_label,
+                hold=True,
+                axes=ax)
 
         plt.ylabel('IO Write (MB)')
         plt.title('Write sum for ' + self.procname)
@@ -126,31 +169,42 @@ class monitorplot:
         plt.xlabel('Time(s)')
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
-            
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
-               
+
     def IO_speed_plot(self, outfile, ax=None):
+        """"
+        plot I/O write speed.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(5, figsize=(15.0, 15.0))
-        
+
         if self.ncsv > 4:
-            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals = range(0, self.ncsv, self.ncsv / 4)
             sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
-        
-        for i in sel_vals:            
+
+        for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
             else:
                 core_label = str(i + 1) + ' cores'
-                
-            df['IO_WRITE_BYTES'] = df['IO_WRITE_BYTES'].diff() / df['TIME'].diff() / int(1e6)
-            plt.plot(df['TIME'].values, df['IO_WRITE_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+            df['IO_WRITE_BYTES'] = df[
+                'IO_WRITE_BYTES'].diff() / df['TIME'].diff() / int(1e6)
+            plt.plot(
+                df['TIME'].values,
+                df['IO_WRITE_BYTES'].values,
+                label=core_label,
+                hold=True,
+                axes=ax)
 
         plt.ylabel('IO Write (MB/s)')
         plt.title('Write rate for ' + self.procname)
@@ -159,31 +213,42 @@ class monitorplot:
         plt.xlabel('Time(s)')
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
-            
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
-    
+
     def IO_read(self, outfile, ax=None):
+        """"
+        plot I/O read speed.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(5, figsize=(15.0, 15.0))
-        
+
         if self.ncsv > 4:
-            sel_vals = range(0, self.ncsv, self.ncsv/4)
+            sel_vals = range(0, self.ncsv, self.ncsv / 4)
             sel_vals.append(self.ncsv - 1)
         else:
             sel_vals = xrange(self.ncsv)
-        
-        for i in sel_vals:            
+
+        for i in sel_vals:
             df = self.read_monitor_log(i)
             if i == 0:
                 core_label = '1 core'
             else:
                 core_label = str(i + 1) + ' cores'
-                
-            df['IO_READ_BYTES'] = df['IO_READ_BYTES'].diff() / df['TIME'].diff() / int(1e6)
-            plt.plot(df['TIME'].values, df['IO_READ_BYTES'].values, label=core_label, hold=True, axes=ax)
+
+            df['IO_READ_BYTES'] = df['IO_READ_BYTES'].diff() / df[
+                'TIME'].diff() / int(1e6)
+            plt.plot(
+                df['TIME'].values,
+                df['IO_READ_BYTES'].values,
+                label=core_label,
+                hold=True,
+                axes=ax)
 
         plt.ylabel('I\O Read (MB/s)')
         plt.title('Read rate for ' + self.procname)
@@ -192,18 +257,25 @@ class monitorplot:
         plt.xlabel('Time(s)')
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
-            
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
             plt.close()
-                 
+
     def times_bar(self, outfile='', ax=None, speed_frame=None):
+        """"
+        plot the total execution time in a bar plot.
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure.
+        if speed_frame is defined, use external time values instead of
+        reading them inside the function
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(6, figsize=(5.0, 15.0))
-        
+
         cores = [i + 1 for i in range(self.ncsv)]
-            
+
         if speed_frame is None:
             times = pd.Series(index=cores)
             for i in xrange(int(self.ncsv)):
@@ -212,8 +284,8 @@ class monitorplot:
                 times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
         else:
             times = speed_frame
-            
-        times.plot(kind='bar', label = 'Execution time', axes=ax)
+
+        times.plot(kind='bar', label='Execution time', axes=ax)
         plt.ylabel('Time(s)')
         plt.xlabel('Number of cores')
         plt.title('Execution time for' + self.procname)
@@ -227,12 +299,22 @@ class monitorplot:
         if outfile is not '':
             plt.savefig(outfile + '.png')
             plt.close()
-        
-    def speed_plot(self, outfile='', ax=None, speed_frame=None, amdahl_frame=None):
+
+    def speed_plot(self, outfile='', ax=None,
+                   speed_frame=None, amdahl_frame=None):
+        """"
+        plot the speedup
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure.
+        if speed_frame is defined, use external time values instead of
+            reading them inside the function
+        if amdahl_frame is defined, use these values to also plot the
+            predicted speedup
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(7, figsize=(5.0, 15.0))
-            
+
         if speed_frame is None:
             cores = [i + 1 for i in range(self.ncsv)]
             times = pd.Series(index=cores)
@@ -244,8 +326,14 @@ class monitorplot:
             speed = pd.Series(data=times[1] / times, index=cores)
         else:
             speed = speed_frame[1] / speed_frame
-            
-        speed.plot(color='g', marker='.', ls='-', ms=15.0, mec='r',label='Measured values')
+
+        speed.plot(
+            color='g',
+            marker='.',
+            ls='-',
+            ms=15.0,
+            mec='r',
+            label='Measured values')
         if amdahl_frame is not None:
             amdahl_frame.plot(color='b', ls='-', label='Amdahl\'s Law')
         plt.ylabel('Speed-up')
@@ -257,16 +345,26 @@ class monitorplot:
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
         plt.legend(loc=0)
-        
+
         if outfile is not '':
             plt.savefig(outfile + '.png')
             plt.close()
-        
-    def eff_plot(self, outfile='', ax=None, speed_frame=None, amdahl_frame=None):
+
+    def eff_plot(self, outfile='', ax=None,
+                 speed_frame=None, amdahl_frame=None):
+        """"
+        plot the efficiency
+        if outfile is defined, save to file.
+        if ax is defined, paste the plot in a separate figure.
+        if speed_frame is defined, use external time values instead of
+            reading them inside the function
+        if amdahl_frame is defined, use these values to also plot the
+            predicted efficiency
+        """
         if ax is None:
-            ax=plt.gca()
+            ax = plt.gca()
             fig = plt.figure(8, figsize=(5.0, 15.0))
-            
+
         if speed_frame is None:
             cores = [i + 1 for i in range(self.ncsv)]
             times = pd.Series(index=cores)
@@ -279,9 +377,15 @@ class monitorplot:
         else:
             cores = [i + 1 for i in range(self.ncsv)]
             eff = speed_frame[1] / speed_frame / cores
-            
-        eff.plot(color='r', marker='.', ls='-', ms=15.0, mec='g', label='Measured values')
-        
+
+        eff.plot(
+            color='r',
+            marker='.',
+            ls='-',
+            ms=15.0,
+            mec='g',
+            label='Measured values')
+
         if amdahl_frame is not None:
             amdahl_eff = amdahl_frame / cores
             amdahl_eff.plot(color='b', ls='-', label='Amdahl\'s Law')
@@ -294,22 +398,22 @@ class monitorplot:
         [x1, x2, y1, y2] = plt.axis()
         plt.axis((x1, x2, y1, y2 * 1.1))
         plt.legend(loc=0)
-        
+
         if outfile is not '':
             plt.savefig(outfile + '.png')
             plt.close()
-        
+
     def mplot(self, outfile, figtitle):
         """
         function used to plot the data gathered by monitor.py
-        if outfile is '' <empty>, then the function returns the plot 
+        if outfile is '' <empty>, then the function returns the plot
         instance for further modifications
         """
         fig = plt.figure(1, figsize=(15.0, 15.0))
-        
+
         sub1 = plt.subplot(411)
         self.CPU_plot('', sub1)
-        
+
         sub2 = plt.subplot(412)
         self.MEM_plot('', sub2)
 
@@ -318,23 +422,25 @@ class monitorplot:
 
         sub4 = plt.subplot(414)
         self.IO_speed_plot('', sub4)
-             
+
         fig.subplots_adjust(hspace=.5)
-         
+
         fig.suptitle(figtitle)
-        
+
         if outfile is not '':
             plt.savefig(outfile + ".png")
         else:
             return plt
         plt.close()
-    
+
     def splot(self, figtitle, outfile='', speed_frame=None, amdahl_frame=None):
         """
         function used for plotting the speed up.
-        If speed_frame is defined and contains other time values than the total ones,
-        the default method for aquiring data is overriden and the new values are plotted instead.
-        (int ncores, str out_pref, boolean save_plot, pandas.DataFrame speed_frame)
+        If speed_frame is defined and contains other time values
+            than the total ones, the default method for aquiring data
+            is overriden and the new values are plotted instead.
+        If amdahl_frame is defined, it will be a pd.Series object
+            and will contain the predicted speedup for a number of cores.
         """
         if speed_frame is None:
             cores = [i + 1 for i in range(self.ncsv)]
@@ -342,45 +448,63 @@ class monitorplot:
             for i in xrange(int(self.ncsv)):
                 df = self.read_monitor_log(i)
                 # time spent for the whole process
-                times[i+1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
+                times[i + 1] = df['TIME'].iget(-1) - df['TIME'].iget(0)
         else:
             times = speed_frame
-        #plot style definitions
-        speedfig = plt.figure(figsize=(15.0,15.0))
+        # plot style definitions
+        speedfig = plt.figure(figsize=(15.0, 15.0))
         sub1 = plt.subplot(311)
         self.times_bar('', ax=sub1, speed_frame=times)
-        
+
         sub2 = plt.subplot(312)
         self.speed_plot('', sub2, times, amdahl_frame)
-                
+
         sub3 = plt.subplot(313)
         self.eff_plot('', sub3, times, amdahl_frame)
-        
+
         speedfig.subplots_adjust(hspace=.5)
 
         speedfig.suptitle(figtitle)
-            
+
         if outfile is not '':
             plt.savefig(outfile + '.png')
 
         plt.close()
 
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-i', '--infile', default='monitor',
                         help='Input file name - prefix')
-    parser.add_argument('-n', '--nrcsv', default=multiprocessing.cpu_count(), type=int,
-                        help='Number of csv files')
+    parser.add_argument(
+        '-n', '--nrcsv', default=multiprocessing.cpu_count(), type=int,
+        help='Number of csv files')
     parser.add_argument('-o', '--out_pref', default='',
                         help='Outfile prefix')
     parser.add_argument('-fn', '--function', default='',
-                        help='If a ctools function has been monitored, it should be mentioned here\\ Ex. -fn=ctobssim')
-    
+                        help='If a ctools function has been monitored, it ' +
+                        'should be mentioned here\\ Ex. -fn=ctobssim')
+
     args = parser.parse_args()
     my_mplot = monitorplot(args.infile, args.nrcsv, args.function)
-    my_mplot.mplot(outfile='plots/' + args.out_pref + '_' + args.function + '_' + platform.node(),
-           figtitle='Machine: ' + platform.node())
-    my_mplot.splot('Machine: ' + platform.node(), 'plots/' + args.out_pref + '_' + args.function + '_' + platform.node() + 'speed_up', None, None)
-    
+    my_mplot.mplot(
+        outfile='plots/' + args.out_pref + '_' +
+        args.function + '_' + platform.node(),
+        figtitle='Machine: ' + platform.node())
+    my_mplot.splot(
+        'Machine: ' +
+        platform.node(
+        ),
+        'plots/' +
+        args.out_pref +
+        '_' +
+        args.function +
+        '_' +
+        platform.node(
+        ) +
+        'speed_up',
+        None,
+        None)
+
 if __name__ == '__main__':
     main()
