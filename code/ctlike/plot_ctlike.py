@@ -96,16 +96,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-i', '--infile', default='monitor',
                         help='Input file name - prefix')
-    parser.add_argument(
-        '-n', '--nrcsv', default=multiprocessing.cpu_count(), type=int,
-        help='Number of csv files')
+    parser.add_argument('-n', '--nrcsv', default=multiprocessing.cpu_count(), 
+                        type=int, help='Number of csv files')
     parser.add_argument('-o', '--outpref', default='ctlike',
                         help='Outfile prefix')
     parser.add_argument('-log', default=False, type=bool,
                         help='if gammaspeed logging statements have been ' +
                         'added to ctools and gammalib, this option should' +
                         ' be set to True')
-
+    
     args = parser.parse_args()
 
     my_plotter = mtp.monitorplot(args.infile, args.nrcsv, " ctlike")
