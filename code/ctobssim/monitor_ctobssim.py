@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-mt', '--maxthreads', default=multiprocessing.cpu_count(),
                         type=int, help='Maximum number of threads for the measurement')
-    parser.add_argument('-l', '--loop', default=True, type=bool,
+    parser.add_argument('-l', '--loop', default=False, type=bool,
                         help='if more than one processors is specified, choose wether to\\'
                         + 'loop until the number of maxthreads has been reached\\'
                         + 'or use that number of threads from the start')
@@ -24,8 +24,7 @@ def main():
     
     
     args = parser.parse_args()
-    
-    if(args.loop):
+    if args.loop:
         for nthrd in xrange(int(args.maxthreads)):
             ctobs_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobsargs, nthrd + 1)
             ctobs_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
