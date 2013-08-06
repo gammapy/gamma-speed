@@ -64,9 +64,9 @@ def ctobssim_speed_up(my_plotter, ncsv, outpref, log_exists=False):
         parallel_loop = pd.Series(index=cores)
         for i in xrange(my_plotter.ncsv):
             df = pd.read_csv(
-                my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
+                my_plotter.infile + "_CPUs_" + str(i + 1) + ".csv")
             aux = select_lines(
-                'ctobssim_CPUs=' + str(i + 1) + '.csv',
+                'ctobssim_CPUs_' + str(i + 1) + '.csv',
                 df.at[0, 'TIME'],
                 ['gammaspeed:parallel_region_start',
                  'gammaspeed:parallel_region_end'])
@@ -113,7 +113,7 @@ def main():
 
     args = parser.parse_args()
 
-    my_plotter = mtp.monitorplot(args.infile, args.nrcsv, " ctobssim")
+    my_plotter = mtp.MonitorPlot(args.infile, args.nrcsv, " ctobssim")
     ctobssim_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
     ctobssim_separate_plots(my_plotter, args.nrcsv, args.outpref, args.log)
     ctobssim_speed_up(my_plotter, args.nrcsv, args.outpref, args.log)

@@ -18,7 +18,7 @@ def main():
                         'choose wether to loop until the number of ' +
                         'maxthreads has been reached or use that number' +
                         ' of threads from the start')
-    parser.add_argument('-ca', '--ctlikesargs', default='', type=str,
+    parser.add_argument('-pa', '--pipeargs', default='', type=str,
                         help="Arguments that should be passed to " +
                         "run_multi_ctobssim. For more details, see the " +
                         "help of run_multi_ctobssim")
@@ -31,24 +31,24 @@ def main():
 
     if args.loop:
         for nthrd in xrange(int(args.maxthreads)):
-            pipe_monitor = mt.monitor("./run_pipeline.py" + args.pipeargs, nthrd + 1)
-            pipe_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
-            if args.logging:
+            pipe_monitor = mt.Monitor("./run_pipeline.py" + args.pipeargs, nthrd + 1)
+            pipe_monitor.monitor("monitor_CPUs_" + str(nthrd + 1) + ".csv", 0.1)
+            if args.log:
                 try:
                     pipe_monitor.parse_extension(
                         logext='*.log',
-                        outname='pipeline_CPUs=' + str(nthrd + 1) + '.csv',
+                        outname='pipeline_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
                 except ValueError:
                     print 'no log file(s) found'
     else:
-        pipe_monitor = mt.monitor("./run_pipeline.py" + args.pipeargs, args.maxthreads)
-        pipe_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
-        if args.logging:
+        pipe_monitor = mt.Monitor("./run_pipeline.py" + args.pipeargs, args.maxthreads)
+        pipe_monitor.monitor("monitor_CPUs_" + str(args.maxthreads) + ".csv", 0.1)
+        if args.log:
             try:
                 pipe_monitor.parse_extension(
                     logext='*.log',
-                    outname='pipeline_CPUs=' + str(args.maxthreads) + '.csv',
+                    outname='pipeline_CPUs_' + str(args.maxthreads) + '.csv',
                     time_shift=TIME_ZONE_SHIFT)
             except ValueError:
                 print 'no log file(s) found'

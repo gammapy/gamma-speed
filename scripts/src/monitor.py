@@ -12,9 +12,10 @@ import time
 import multiprocessing
 import os
 import glob
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
-
-class monitor:
+class Monitor(object):
 
     def __init__(self, cmd, nthreads):
         """Initialize a monitor object with a given command (cmd is a string)
@@ -52,9 +53,10 @@ class monitor:
                            'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
                 self.df = self.df.append(s, ignore_index=True)
             except psutil.AccessDenied:
-                print 'Process is over for ' + str(self.threads) + ' thread(s)'
+                logging.info('Process is over for ' + str(self.threads) + ' thread(s)')
         # write the values into a csv file
         self.df.to_csv(outfile)
+        logging.info('Wrote file ' + outfile)
 
     def parse_time(self, time_s, time_shift):
         """parse the time for a GLog entry into second since the epoch"""
@@ -77,8 +79,8 @@ class monitor:
         for c in content:
             time = c.split()[0]
             event = c.split()[2:]
-            s = pd.Series(index=['TIME', 'EVENT'], data=[
-                          self.parse_time(time, time_shift), event])
+            s = pd.Series(index=['TIME', 'EVENT'], 
+                          data=[self.parse_time(time, time_shift), event])
             log_frame = log_frame.append(s, ignore_index=True)
         return log_frame
 
@@ -93,6 +95,7 @@ class monitor:
                     time_shift),
                 ignore_index=True)
         log.to_csv(outname)
+        logging.info('Wrote file ' + outname)
 
 
 def main():
@@ -121,14 +124,14 @@ def main():
 
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            my_monitor = monitor(args.cmd, nthrd + 1)
+            my_monitor = Monitor(args.cmd, nthrd + 1)
             my_monitor.monitor(
-                outfile=args.outfile + "_CPUs=" + str(nthrd + 1) + ".csv",
+                outfile=args.outfile + "_CPUs_" + str(nthrd + 1) + ".csv",
                 cpuinterval=args.timeinterval)
     else:
-        my_monitor = monitor(args.cmd, args.maxthreads)
+        my_monitor = Monitor(args.cmd, args.maxthreads)
         my_monitor.monitor(
-            outfile=args.outfile + "_CPUs=" + str(args.maxthreads) + ".csv",
+            outfile=args.outfile + "_CPUs_" + str(args.maxthreads) + ".csv",
             cpuinterval=args.timeinterval)
 
 if __name__ == '__main__':

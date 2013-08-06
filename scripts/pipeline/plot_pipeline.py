@@ -58,8 +58,8 @@ def pipeline_speed_up(my_plotter, outpref, log_exists):
         parallel_loop = pd.Series(index=cores)
         for i in xrange(my_plotter.ncsv):
             df = pd.read_csv(
-                my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
-            aux = select_lines('pipeline_CPUs=' + str(i + 1) + '.csv',
+                my_plotter.infile + "_CPUs_" + str(i + 1) + ".csv")
+            aux = select_lines('pipeline_CPUs_' + str(i + 1) + '.csv',
                                df.at[0, 'TIME'], ['gammaspeed:'])
             parallel_loop[i + 1] = aux[1] - aux[0] + aux[3] - aux[2]
 
@@ -102,7 +102,7 @@ def main():
 
     args = parser.parse_args()
 
-    my_plotter = mtp.monitorplot(args.infile, args.nrcsv, " pipeline")
+    my_plotter = mtp.MonitorPlot(args.infile, args.nrcsv, " pipeline")
     pipeline_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
     pipeline_speed_up(my_plotter, args.outpref, args.log)
     pipeline_separate_plots(my_plotter, args.outpref, args.log)

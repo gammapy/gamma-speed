@@ -31,25 +31,25 @@ def main():
 
     if args.loop:
         for nthrd in xrange(int(args.maxthreads)):
-            ctobssim_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobssimsargs, nthrd + 1)
-            ctobssim_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
+            ctobssim_monitor = mt.Monitor("./run_multi_ctobssim.py" + args.ctobssimsargs, nthrd + 1)
+            ctobssim_monitor.monitor("monitor_CPUs_" + str(nthrd + 1) + ".csv", 0.1)
             if args.log:
                 try:
                     ctobssim_monitor.parse_extension(
                         logext='*.log',
-                        outname='ctobssim_CPUs=' + str(nthrd + 1) + '.csv',
+                        outname='ctobssim_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
                 except ValueError:
                     print 'no log file(s) found'
                     pass
     else:
-        ctobssim_monitor = mt.monitor("./run_multi_ctobssim.py" + args.ctobssimargs, args.maxthreads)
-        ctobssim_monitor.monitor( "monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
+        ctobssim_monitor = mt.Monitor("./run_multi_ctobssim.py" + args.ctobssimargs, args.maxthreads)
+        ctobssim_monitor.monitor( "monitor_CPUs_" + str(args.maxthreads) + ".csv", 0.1)
         if args.log:
             try:
                 ctobssim_monitor.parse_extension(
                     str("*.log"),
-                    outname='ctobssim_CPUs=' + str(args.maxthreads) + '.csv',
+                    outname='ctobssim_CPUs_' + str(args.maxthreads) + '.csv',
                     time_shift=TIME_ZONE_SHIFT)
             except ValueError:
                 pass

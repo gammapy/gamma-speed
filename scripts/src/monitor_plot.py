@@ -14,9 +14,10 @@ from matplotlib.ticker import FormatStrFormatter
 import multiprocessing
 import numpy as np
 import platform
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
-
-class monitorplot:
+class MonitorPlot(object):
 
     def __init__(self, infile, ncsv, procname):
         """
@@ -31,8 +32,9 @@ class monitorplot:
         """
         used to read the monitor.py output files
         """
-        filename = self.infile + "_CPUs=" + str(current_CPU_count + 1) + ".csv"
+        filename = self.infile + "_CPUs_" + str(current_CPU_count + 1) + ".csv"
         df = pd.read_csv(filename)
+#         logging.info('Read file \"' + filename + '\"')
         name = df.at[1, 'PROCESS_NAME']
         df['MEM_USAGE'] = df['MEM_USAGE'] / int(1e6)
         df['TIME'] = df['TIME'] - df.at[0, 'TIME']
@@ -45,6 +47,7 @@ class monitorplot:
         filename = self.procname + "_CPUs=" + \
             str(current_CPU_count + 1) + ".csv"
         df = pd.read_csv(filename)
+#         logging.info('Read file \"' + filename + '\"')
         return df
 
     def CPU_plot(self, outfile, ax=None):
@@ -87,6 +90,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + ".png")
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def MEM_plot(self, outfile, ax=None):
@@ -129,6 +133,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + ".png")
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def IO_cumulative_plot(self, outfile, ax=None):
@@ -172,6 +177,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + ".png")
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def IO_speed_plot(self, outfile, ax=None):
@@ -215,6 +221,7 @@ class monitorplot:
         plt.axis((x1, x2, y1, y2 * 1.1))
 
         if outfile is not '':
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.savefig(outfile + ".png")
             plt.close()
 
@@ -260,6 +267,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + ".png")
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def times_bar(self, outfile='', ax=None, speed_frame=None):
@@ -298,6 +306,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + '.png')
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def speed_plot(self, outfile='', ax=None,
@@ -348,6 +357,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + '.png')
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def eff_plot(self, outfile='', ax=None,
@@ -401,6 +411,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + '.png')
+            logging.info('Saved plot \"' + outfile + '\"')
             plt.close()
 
     def mplot(self, outfile, figtitle):
@@ -468,7 +479,7 @@ class monitorplot:
 
         if outfile is not '':
             plt.savefig(outfile + '.png')
-
+            logging.info('Saved plot \"' + outfile + '\"')
         plt.close()
 
 
@@ -486,23 +497,14 @@ def main():
                         'should be mentioned here\\ Ex. -fn=ctobssim')
 
     args = parser.parse_args()
-    my_mplot = monitorplot(args.infile, args.nrcsv, args.function)
+    my_mplot = MonitorPlot(args.infile, args.nrcsv, args.function)
     my_mplot.mplot(
         outfile='plots/' + args.out_pref + '_' +
         args.function + '_' + platform.node(),
         figtitle='Machine: ' + platform.node())
     my_mplot.splot(
-        'Machine: ' +
-        platform.node(
-        ),
-        'plots/' +
-        args.out_pref +
-        '_' +
-        args.function +
-        '_' +
-        platform.node(
-        ) +
-        'speed_up',
+        'Machine: ' + platform.node(),
+        'plots/' + args.out_pref + '_' + args.function + '_' + 'speed_up',
         None,
         None)
 

@@ -167,7 +167,7 @@ def pipeline_save(nevents):
     events.append("gammaspeed_ctlike_start")
 
     s = pd.Series(events, index=times)
-    s.to_csv("pipeline_save_CPU=" + str(multiprocessing.cpu_count()) + ".csv")
+    s.to_csv("pipeline_save_CPU_" + str(multiprocessing.cpu_count()) + ".csv")
     # Return
     return
 
@@ -244,7 +244,7 @@ def pipeline_in_memory(nevents):
     events.append("gammaspeed_ctlike_end")
 
     s = pd.Series(events, index=times)
-    s.to_csv("pipeline_in_memory_CPU=" +
+    s.to_csv("pipeline_in_memory_CPU_" +
              str(multiprocessing.cpu_count()) + ".csv")
 
 if __name__ == '__main__':

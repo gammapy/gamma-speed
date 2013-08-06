@@ -34,25 +34,25 @@ def main():
 
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            ctlike_monitor = mt.monitor("./run_multi_ctlike.py" + args.ctlikesargs, nthrd + 1)
-            ctlike_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
+            ctlike_monitor = mt.Monitor("./run_multi_ctlike.py" + args.ctlikesargs, nthrd + 1)
+            ctlike_monitor.monitor("monitor_CPUs_" + str(nthrd + 1) + ".csv", 0.1)
             if args.log:
                 try:
                     ctlike_monitor.parse_extension(
                         logext='*.log',
-                        outname='ctlike_CPUs=' + str(nthrd + 1) + '.csv',
+                        outname='ctlike_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
                 except ValueError:
                     print 'no log file(s) found'
                     pass
     else:
-        ctlike_monitor = mt.monitor("./run_multi_ctlike.py" + args.ctlikeargs, args.maxthreads)
-        ctlike_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
+        ctlike_monitor = mt.Monitor("./run_multi_ctlike.py" + args.ctlikeargs, args.maxthreads)
+        ctlike_monitor.monitor("monitor_CPUs_" + str(args.maxthreads) + ".csv", 0.1)
         if args.log:
             try:
                 ctlike_monitor.parse_extension(
                     str("*.log"),
-                    outname='ctlike_CPUs=' + str(args.maxthreads) + '.csv',
+                    outname='ctlike_CPUs_' + str(args.maxthreads) + '.csv',
                     time_shift=TIME_ZONE_SHIFT)
             except ValueError:
                 pass

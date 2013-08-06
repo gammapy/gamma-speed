@@ -60,9 +60,9 @@ def ctlike_speed_up(my_plotter, outpref, log_exists=False):
         parallel_loop = pd.Series(index=cores)
         for i in xrange(my_plotter.ncsv):
             df = pd.read_csv(
-                my_plotter.infile + "_CPUs=" + str(i + 1) + ".csv")
+                my_plotter.infile + "_CPUs_" + str(i + 1) + ".csv")
             aux = select_lines(
-                'ctlike_CPUs=' + str(i + 1) + '.csv',
+                'ctlike_CPUs_' + str(i + 1) + '.csv',
                 df.at[0, 'TIME'],
                 ['gammaspeed:real_parallel_start',
                  'gammaspeed:real_parallel_end'])
@@ -107,7 +107,7 @@ def main():
     
     args = parser.parse_args()
 
-    my_plotter = mtp.monitorplot(args.infile, args.nrcsv, " ctlike")
+    my_plotter = mtp.MonitorPlot(args.infile, args.nrcsv, " ctlike")
     ctlike_mplot(my_plotter, args.nrcsv, args.outpref, args.log)
     ctlike_separate_plots(my_plotter, args.nrcsv, args.outpref, args.log)
     ctlike_speed_up(my_plotter, args.outpref, args.log)
