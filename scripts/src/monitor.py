@@ -21,7 +21,9 @@ import multiprocessing
 import os
 import glob
 import logging
+import shlex
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
+import sys
 
 class Monitor(object):
     """Monitor RAM, CPU, and disk I/O for a given process
@@ -53,21 +55,37 @@ class Monitor(object):
         parse all the log files that have the name '*.logext', select entries
         with parse_log and write them to the file outname
     
+    Examples
+    --------
+    1. Say you want to monitor the command "sleep 3" which does nothing but 
+        take 3 seconds to run. What you would then have to do is run the 
+        following from the command line::
+            ./monitor.py --loop=True "sleep 3"
+        This would then produce a number n(=number of CPUs available on the 
+        machine) outfiles which contain the output of the measurements
+    2. If you want to only monitor for a certain number of threads, say 3,
+        then the command looks like::
+            ./monitor.py --maxthreads=3 --loop=False "sleep 3"
+        This would then have as output only one file namely::
+            monitor_CPUs_3.csv
+    3. (for gammalib and ctools) If you have added special log statements 
+        inside the source code, you can interpret these log statements through 
+        the option::
+            ./monitor.py -log=True
+    
     """
     
     def __init__(self, cmd, nthreads):
         self.threads = nthreads
         os.environ["OMP_NUM_THREADS"] = str(self.threads)
-        self.process = psutil.Popen(cmd.split(), stdout=subprocess.PIPE)
+        self.process = psutil.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
         self.df = pd.DataFrame(
             columns=['CPU_USAGE',
                      'MEM_USAGE',
-                     'IO_READ_COUNTS',
                      'IO_READ_BYTES',
-                     'IO_WRITE_COUNTS',
                      'IO_WRITE_BYTES',
                      'PROCESS_NAME',
-                     'TIME'])
+                     'TIME', 'NUM_THREADS'])
         self.name = self.process.name
 
     def monitor(self, outfile, cpuinterval):
@@ -91,27 +109,66 @@ class Monitor(object):
         method will sample the resource utilization of that command at given 
         intervals.
         """
-        # The following thread stops when the initial one has come to a halt.
+        
+        # Remember start time for on screen display
+        start = time.time()
+        # While the process does not have an exit status i.e. process.poll() 
+        # is None, monitor the process
         while self.process.poll() is None:
             try:
+                # get the CPU value with a frequency of cpuinterval
+                # this is a blocking operation i.e. it will wait for 
+                # cpuinterval seconds before continuing the while loop
+                CPU = self.process.get_cpu_percent(interval=float(cpuinterval))
+                MEM = self.process.get_memory_info()[1]
+                    
+                # the get_io_counters() does not seem to work on Mac, so it 
+                # has been surrounded in a try except loop
+                try:
+                    READ = self.process.get_io_counters()[2]
+                    WRITE = self.process.get_io_counters()[3]
+                except AttributeError:
+                    print 'error baby!!!!'
+                    READ = None
+                    WRITE = None
+                
+                # get the process name
+                NAME = self.name
+                TIME = time.time()
+                THREADS = self.process.get_num_threads()
+                
+                # write these values to an auxiliary pd.Series object that can
+                # be appended to the main DataFrame later
                 s = pd.Series(
-                    [self.process.get_cpu_percent(interval=float(cpuinterval)),
-                     self.process.get_memory_info()[1],
-                     self.process.get_io_counters()[0],
-                     self.process.get_io_counters()[2],
-                     self.process.get_io_counters()[1],
-                     self.process.get_io_counters()[3],
-                     self.name, time.time()],
-                    index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_COUNTS',
-                           'IO_READ_BYTES', 'IO_WRITE_COUNTS',
-                           'IO_WRITE_BYTES', 'PROCESS_NAME', 'TIME'])
-                self.df = self.df.append(s, ignore_index=True)
-            except psutil.AccessDenied:
-                logging.info('Process is over for ' + str(self.threads) + ' thread(s)')
-        # write the values into a csv file
-        self.df.to_csv(outfile)
-        logging.info('Wrote file ' + outfile)
+                    data = [CPU, MEM, READ, WRITE, NAME, TIME, THREADS],
+                    index=['CPU_USAGE', 'MEM_USAGE', 'IO_READ_BYTES', 'IO_WRITE_BYTES',
+                            'PROCESS_NAME', 'TIME', 'NUM_THREADS'])
 
+                # append the values of this measurement                
+                self.df = self.df.append(s, ignore_index=True)
+                # print the runtime on screen
+                sys.stdout.write('\r')
+                sys.stdout.write("Runtime ............................. " + "{:5.2f}".format(TIME-start) + " seconds")
+                sys.stdout.flush()
+    
+            except psutil.AccessDenied:
+                # the while loop exits when the process is over.
+                # However, it might happen that the process finished inside 
+                # the while loop. Once the process is dead, there is no
+                # information available about it anymore and any method called
+                # on the process will return psutil.AccessDenied as an error
+                # This is how you know that the process is dead.
+                sys.stdout.write('\n')
+                sys.stdout.flush()
+                logging.info('Process is over for ' + str(self.threads) + ' thread(s)')
+                print self.df.describe()
+
+        # write the values into a csv file
+        self.df.to_csv(outfile, index=False)
+        logging.info('Wrote file ' + outfile)
+        
+        sys.stdout.write('\n\n.................................................................................\n\n')
+    
     def parse_time(self, time_s, time_shift):
         """parse the time for a GLog entry
         
