@@ -4,7 +4,7 @@ Function used to monitor ctlike on multiple observations
 """
 import argparse
 import multiprocessing
-import src.monitor as mt
+import monitor as mt
 TIME_ZONE_SHIFT = 7200  # the ctobssim log messages correspond to
                         # Greenwich Mean Time and python makes the
                         # measurements for the current time zone -
@@ -34,11 +34,8 @@ def main():
 
     if(args.loop):
         for nthrd in xrange(int(args.maxthreads)):
-            ctlike_monitor =
-                mt.monitor("./run_multi_ctlike.py" + args.ctlikesargs,
-                           nthrd + 1)
-            ctlike_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv",
-                                   0.1)
+            ctlike_monitor = mt.monitor("./run_multi_ctlike.py" + args.ctlikesargs, nthrd + 1)
+            ctlike_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
             if args.log:
                 try:
                     ctlike_monitor.parse_extension(
@@ -49,10 +46,8 @@ def main():
                     print 'no log file(s) found'
                     pass
     else:
-        ctlike_monitor = mt.monitor("./run_multi_ctlike.py" + args.ctlikeargs,
-                                    args.maxthreads)
-        ctlike_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv",
-                               0.1)
+        ctlike_monitor = mt.monitor("./run_multi_ctlike.py" + args.ctlikeargs, args.maxthreads)
+        ctlike_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
         if args.log:
             try:
                 ctlike_monitor.parse_extension(

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import multiprocessing
-import src.monitor as mt
+import monitor as mt
 TIME_ZONE_SHIFT = 7200  # the ctobssim log messages correspond to
                         # Greenwich Mean Time and python makes the
                         # measurements for the current time zone -
@@ -31,11 +31,8 @@ def main():
 
     if args.loop:
         for nthrd in xrange(int(args.maxthreads)):
-            pipe_monitor =
-            mt.monitor("./run_pipeline.py" + args.pipeargs,
-                       nthrd + 1)
-            pipe_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv",
-                                 0.1)
+            pipe_monitor = mt.monitor("./run_pipeline.py" + args.pipeargs, nthrd + 1)
+            pipe_monitor.monitor("monitor_CPUs=" + str(nthrd + 1) + ".csv", 0.1)
             if args.logging:
                 try:
                     pipe_monitor.parse_extension(
@@ -45,11 +42,8 @@ def main():
                 except ValueError:
                     print 'no log file(s) found'
     else:
-        pipe_monitor =
-        mt.monitor("./run_pipeline.py" + args.pipeargs,
-                   args.maxthreads)
-        pipe_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv",
-                             0.1)
+        pipe_monitor = mt.monitor("./run_pipeline.py" + args.pipeargs, args.maxthreads)
+        pipe_monitor.monitor("monitor_CPUs=" + str(args.maxthreads) + ".csv", 0.1)
         if args.logging:
             try:
                 pipe_monitor.parse_extension(

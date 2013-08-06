@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from . import src.monitor_plot as mtp
+import monitor_plot as mtp
 import argparse
 import multiprocessing
 import pandas as pd

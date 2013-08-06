@@ -16,23 +16,23 @@ if [ "$TEST" = "CPUINTERVAL" ]; then
     mkdir plots/CPU_INTERVAL
     g++ -fopenmp -o use_cpu use_cpu.cpp
     
-    src/monitor.py -ti 0.001 -l True ./use_cpu
-    src/monitor_plot.py -o "CPU_INTERVAL/t=0.001_"
+    ../src/monitor.py -ti 0.001 -l True ./use_cpu
+    ../src/monitor_plot.py -o "CPU_INTERVAL/t=0.001_"
     mkdir plots/CPU_INTERVAL/t=0.001
     mv *.csv plots/CPU_INTERVAL/t=0.001
 
-    src/monitor.py -ti 0.01 -l True ./use_cpu
-    src/monitor_plot.py -o "CPU_INTERVAL/t=0.01_"
+    ../src/monitor.py -ti 0.01 -l True ./use_cpu
+    ../src/monitor_plot.py -o "CPU_INTERVAL/t=0.01_"
     mkdir plots/CPU_INTERVAL/t=0.01
     mv *.csv plots/CPU_INTERVAL/t=0.01
     
-    src/monitor.py -ti 0.1 -l True ./use_cpu
-    src/monitor_plot.py -o "CPU_INTERVAL/t=0.1_"
+    ../src/monitor.py -ti 0.1 -l True ./use_cpu
+    ../src/monitor_plot.py -o "CPU_INTERVAL/t=0.1_"
     mkdir plots/CPU_INTERVAL/t=0.1
     mv *.csv plots/CPU_INTERVAL/t=0.1
     
-    src/monitor.py -ti 1 -l True ./use_cpu
-    src/monitor_plot.py -o "CPU_INTERVAL/t=1.0_"
+    ../src/monitor.py -ti 1 -l True ./use_cpu
+    ../src/monitor_plot.py -o "CPU_INTERVAL/t=1.0_"
     mkdir plots/CPU_INTERVAL/t=1
     mv *.csv plots/CPU_INTERVAL/t=1
 fi;
@@ -42,8 +42,8 @@ if [ "$TEST" = "CPUUSAGE" ]; then
     mkdir plots/CPUUSAGE
     g++ -fopenmp -o use_cpu use_cpu.cpp
     
-    src/monitor.py -ti 0.1 -l True ./use_cpu
-    src/monitor_plot.py -o "CPUUSAGE/usage"
+    ../src/monitor.py -ti 0.1 -l True ./use_cpu
+    ../src/monitor_plot.py -o "CPUUSAGE/usage"
     mv *.csv plots/CPUUSAGE
 fi;
 
@@ -51,8 +51,8 @@ if [ "$TEST" = "LIMITCASE" ]; then
     mkdir plots
     mkdir plots/LIMITCASE
     
-    src/monitor.py -ti 0.1 -l True ./limit_cases.py
-    src/monitor_plot.py -o "LIMITCASE/limit"
+    ../src/monitor.py -ti 0.1 -l True ./limit_cases.py
+    ../src/monitor_plot.py -o "LIMITCASE/limit"
     mv *.csv plots/LIMITCASE
 fi;
 
@@ -68,28 +68,28 @@ if [ "$TEST" = "DISKIO" ]; then
         FILESIZE=1000
     fi
     
-    src/monitor.py -mt=1 "./make_io.py  -iot=gamma_save -s=$FILESIZE"
-    src/monitor_plot.py --nrcsv=1 -o makeio -fn gamma_save -o "DISKIO/gamma_save"
+    ../src/monitor.py -mt=1 "./make_io.py  -iot=gamma_save -s=$FILESIZE"
+    ../src/monitor_plot.py --nrcsv=1 -o makeio -fn gamma_save -o "DISKIO/gamma_save"
     mkdir plots/DISKIO/gamma_save
     mv *.csv plots/DISKIO/gamma_save
 
-    src/monitor.py -mt=1 "./make_io.py  -iot=gamma_saveto -s=$FILESIZE"
-    src/monitor_plot.py --nrcsv=1 -o makeio -fn gamma_saveto -o "DISKIO/gamma_saveto"
+    ../src/monitor.py -mt=1 "./make_io.py  -iot=gamma_saveto -s=$FILESIZE"
+    ../src/monitor_plot.py --nrcsv=1 -o makeio -fn gamma_saveto -o "DISKIO/gamma_saveto"
     mkdir plots/DISKIO/gamma_saveto
     mv *.csv plots/DISKIO/gamma_saveto
 
-    src/monitor.py -mt=1 "./make_io.py  -iot=fits_gen -s=$FILESIZE"
-    src/monitor_plot.py --nrcsv=1 -o makeio -fn fits
+    ../src/monitor.py -mt=1 "./make_io.py  -iot=fits_gen -s=$FILESIZE"
+    ../src/monitor_plot.py --nrcsv=1 -o makeio -fn fits
     mkdir plots/DISKIO/fits_gen
     mv *.csv plots/fits_gen
 
-    src/monitor.py -mt=1 "./make_io.py  -iot=fits_copy -s=$FILESIZE"
-    src/monitor_plot.py --nrcsv=1 -o makeio -fn fits_copy -o "DISKIO/fits_copy"
+    ../src/monitor.py -mt=1 "./make_io.py  -iot=fits_copy -s=$FILESIZE"
+    ../src/monitor_plot.py --nrcsv=1 -o makeio -fn fits_copy -o "DISKIO/fits_copy"
     mkdir plots/DISKIO/fits_copy
     mv *.csv plots/DISKIO/fits_copy
 
-    src/monitor.py -mt=1 "cp copy1.fits copz2.fits"
-    src/monitor_plot.py --nrcsv=1 -o makeio -fn "cp" -o "DISKIO/cp"
+    ../src/monitor.py -mt=1 "cp copy1.fits copz2.fits"
+    ../src/monitor_plot.py --nrcsv=1 -o makeio -fn "cp" -o "DISKIO/cp"
     mkdir plots/DISKIO/copy
     mv *.csv plots/DISKIO/copy
 fi
