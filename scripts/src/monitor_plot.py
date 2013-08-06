@@ -18,6 +18,34 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
 class MonitorPlot(object):
+    """plot the output of monitor.py
+    
+    Parameters
+    ----------
+    
+    infile : string
+        Prefix of the infile name
+    ncsv : int
+        Number of csv files that are to be read
+    procname : string
+        Name of the process that was monitored
+    
+    Usage
+    -----
+    This class is used to produce plots for the values measured by monitor.py
+    
+    Examples
+    --------
+    There are two basic situation in which this class is useful
+    
+    1. Do general CPU, RAM, disk I/O plots by using the methods ``CPU_plot``, 
+    ``MEM_plot``, ``IO_cumulative_plot``, ``IO_speed_plot``, ``IO_read``
+    
+    2. Plot the speed up and efficiency of the process. If available, the 
+    methods used to plot these values can also plot the values predicted by 
+    Amdahl's Law. 
+    
+    """
 
     def __init__(self, infile, ncsv, procname):
         """

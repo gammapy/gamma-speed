@@ -128,7 +128,6 @@ class Monitor(object):
                     READ = self.process.get_io_counters()[2]
                     WRITE = self.process.get_io_counters()[3]
                 except AttributeError:
-                    print 'error baby!!!!'
                     READ = None
                     WRITE = None
                 
