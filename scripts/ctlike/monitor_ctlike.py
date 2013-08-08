@@ -43,7 +43,7 @@ def main():
                         logext='*.log',
                         outname='ctlike_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
-		    shutil.copy2('ctlike.log','original_log_CPUs_'+str(nthrd+1)+'.log')
+                    shutil.copy2('ctlike.log','original_log_CPUs_'+str(nthrd+1)+'.log')
                 except ValueError:
                     print 'no log file(s) found'
                     pass

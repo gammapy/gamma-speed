@@ -2,6 +2,7 @@
 import argparse
 import multiprocessing
 import monitor as mt
+import shutil
 TIME_ZONE_SHIFT = 7200  # the ctobssim log messages correspond to
                         # Greenwich Mean Time and python makes the
                         # measurements for the current time zone -
@@ -39,6 +40,9 @@ def main():
                         logext='*.log',
                         outname='pipeline_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
+                    shutil.copy2('ctlike.log','original_ctlike_CPUs_'+str(nthrd+1)+'.log')
+                    shutil.copy2('ctobssim.log','original_ctobssim_CPUs_'+str(nthrd+1)+'.log')
+                    shutil.copy2('ctbin.log','original_ctbin_CPUs_'+str(nthrd+1)+'.log')
                 except ValueError:
                     print 'no log file(s) found'
     else:
