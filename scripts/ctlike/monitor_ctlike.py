@@ -5,6 +5,7 @@ Function used to monitor ctlike on multiple observations
 import argparse
 import multiprocessing
 import monitor as mt
+import shutil
 TIME_ZONE_SHIFT = 7200  # the ctobssim log messages correspond to
                         # Greenwich Mean Time and python makes the
                         # measurements for the current time zone -
@@ -42,6 +43,7 @@ def main():
                         logext='*.log',
                         outname='ctlike_CPUs_' + str(nthrd + 1) + '.csv',
                         time_shift=TIME_ZONE_SHIFT)
+		    shutil.copy2('ctlike.log','original_log_CPUs_'+str(nthrd+1)+'.log')
                 except ValueError:
                     print 'no log file(s) found'
                     pass
