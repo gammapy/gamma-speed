@@ -1,6 +1,10 @@
 Future directions
 *****************
 
+There are some things we don't understand at the moment that needs further investigation.
+
+See https://github.com/gammapy/gamma-speed/issues .
+
 Measuring FITS I/O
 ==================
 
