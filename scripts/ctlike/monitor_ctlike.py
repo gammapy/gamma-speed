@@ -17,7 +17,7 @@ def main():
     parser.add_argument(
         '-mt', '--maxthreads', default=multiprocessing.cpu_count(),
         type=int, help='Maximum number of threads for the measurement')
-    parser.add_argument('-l', '--loop', default=True, type=bool,
+    parser.add_argument('-l', '--loop', default=False, type=bool,
                         help='if more than one processors is specified, ' +
                         'choose wether to loop until the number of ' +
                         'maxthreads has been reached or use that number' +
@@ -33,7 +33,7 @@ def main():
 
     args = parser.parse_args()
 
-    if(args.loop):
+    if args.loop==True:
         for nthrd in xrange(int(args.maxthreads)):
             ctlike_monitor = mt.Monitor("./run_multi_ctlike.py" + args.ctlikesargs, nthrd + 1)
             ctlike_monitor.monitor("monitor_CPUs_" + str(nthrd + 1) + ".csv", 0.1)
@@ -48,7 +48,8 @@ def main():
                     print 'no log file(s) found'
                     pass
     else:
-        ctlike_monitor = mt.Monitor("./run_multi_ctlike.py" + args.ctlikeargs, args.maxthreads)
+	print 'No loops for me!!'
+        ctlike_monitor = mt.Monitor("./run_multi_ctlike.py" + args.ctlikesargs, args.maxthreads)
         ctlike_monitor.monitor("monitor_CPUs_" + str(args.maxthreads) + ".csv", 0.1)
         if args.log:
             try:
